@@ -61,7 +61,8 @@ export interface AMapSearchResult {
 
 declare global {
   interface Window {
-    AMap: typeof AMap;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    AMap: any;
     initAMap?: () => void;
     _AMapSecurityConfig?: {
       securityJsCode?: string;

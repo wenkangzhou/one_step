@@ -34,7 +34,8 @@ export function AMapLoader({ children, onLoad }: AMapLoaderProps) {
     }
 
     const script = document.createElement('script');
-    script.src = `https://webapi.amap.com/maps?v=2.0&key=${key}&plugin=AMap.Geolocation,AMap.PlaceSearch,AMap.Walking,AMap.Riding`;
+    // 使用 1.4.15 版本，兼容性更好，支持 Canvas 渲染
+    script.src = `https://webapi.amap.com/maps?v=1.4.15&key=${key}&plugin=AMap.Geolocation,AMap.PlaceSearch,AMap.Walking,AMap.Riding`;
     script.async = true;
     script.onload = () => {
       setIsLoaded(true);

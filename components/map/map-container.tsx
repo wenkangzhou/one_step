@@ -39,6 +39,8 @@ function MapComponent({
       dragEnable: interactive,
       zoomEnable: interactive,
       doubleClickZoom: interactive,
+      // 强制使用 Canvas 渲染，避免 WebGL 兼容性问题
+      renderMode: 'canvas',
     });
 
     mapInstance.current = map;
@@ -86,32 +88,30 @@ function MapComponent({
     mapInstance.current.add(polyline);
     polylineRef.current = polyline;
 
-    // 添加起点和终点标记
-    const startMarker = new window.AMap.Marker({
-      position: path[0],
-      icon: new window.AMap.Icon({
-        size: new window.AMap.Size(24, 24),
-        image: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTAiIGZpbGw9IiMzZDhhNWQiLz4KPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iNCIgZmlsbD0id2hpdGUiLz4KPC9zdmc+',
-        imageSize: new window.AMap.Size(24, 24),
-      }),
-      offset: new window.AMap.Pixel(-12, -12),
+    // 添加起点和终点标记 (使用圆点标记)
+    const startMarker = new window.AMap.CircleMarker({
+      center: path[0],
+      radius: 12,
+      fillColor: '#3d8a5d',
+      fillOpacity: 1,
+      strokeColor: '#ffffff',
+      strokeWeight: 2,
     });
 
-    const endMarker = new window.AMap.Marker({
-      position: path[path.length - 1],
-      icon: new window.AMap.Icon({
-        size: new window.AMap.Size(24, 24),
-        image: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTAiIGZpbGw9IiNmNWE2MjMiLz4KPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iNCIgZmlsbD0id2hpdGUiLz4KPC9zdmc+',
-        imageSize: new window.AMap.Size(24, 24),
-      }),
-      offset: new window.AMap.Pixel(-12, -12),
+    const endMarker = new window.AMap.CircleMarker({
+      center: path[path.length - 1],
+      radius: 12,
+      fillColor: '#f5a623',
+      fillOpacity: 1,
+      strokeColor: '#ffffff',
+      strokeWeight: 2,
     });
 
     mapInstance.current.add([startMarker, endMarker]);
     markersRef.current = [startMarker, endMarker];
 
     // 调整视野以显示完整路线
-    mapInstance.current.setFitView([polyline, startMarker, endMarker], true, [50, 50, 50, 50]);
+    mapInstance.current.setFitView();
   }, [showRoute, routePath]);
 
   // 更新当前位置标记
@@ -119,16 +119,15 @@ function MapComponent({
     if (!mapInstance.current || !currentLocation) return;
 
     if (locationMarkerRef.current) {
-      locationMarkerRef.current.setPosition(new window.AMap.LngLat(currentLocation[0], currentLocation[1]));
+      locationMarkerRef.current.setCenter(new window.AMap.LngLat(currentLocation[0], currentLocation[1]));
     } else {
-      const marker = new window.AMap.Marker({
-        position: new window.AMap.LngLat(currentLocation[0], currentLocation[1]),
-        icon: new window.AMap.Icon({
-          size: new window.AMap.Size(20, 20),
-          image: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTAiIGN5PSIxMCIgcj0iOCIgZmlsbD0iIzI1NjNlYiIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyIi8+Cjwvc3ZnPg==',
-          imageSize: new window.AMap.Size(20, 20),
-        }),
-        offset: new window.AMap.Pixel(-10, -10),
+      const marker = new window.AMap.CircleMarker({
+        center: new window.AMap.LngLat(currentLocation[0], currentLocation[1]),
+        radius: 10,
+        fillColor: '#2563eb',
+        fillOpacity: 1,
+        strokeColor: '#ffffff',
+        strokeWeight: 2,
       });
       mapInstance.current.add(marker);
       locationMarkerRef.current = marker;

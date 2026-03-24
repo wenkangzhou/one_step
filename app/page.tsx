@@ -16,51 +16,124 @@ function HomeContent() {
   const [isSearching, setIsSearching] = useState(false);
   const { results, setResults, selectRoute } = useSearchStore();
 
-  // 搜索路线
+  // 搜索路线 (兼容高德地图 1.4.15)
   const searchRoutes = useCallback(async (startName: string, endName: string) => {
     if (!window.AMap) return;
 
     setIsSearching(true);
     
     try {
-      const walking = new window.AMap.Walking({});
-      
-      walking.search(
-        [{ keyword: startName }, { keyword: endName }],
-        (status: string, result: any) => {
+      // 先搜索起点和终点的坐标
+      const placeSearch = new window.AMap.PlaceSearch({
+        pageSize: 1,
+        pageIndex: 1,
+      });
+
+      // 搜索起点
+      placeSearch.search(startName, (status: string, result: any) => {
+        if (status !== 'complete' || !result.poiList || !result.poiList.pois[0]) {
           setIsSearching(false);
-          
-          if (status === 'complete' && result.routes && result.routes.length > 0) {
-            const route = result.routes[0];
-            
-            // 提取路径点
-            const path: Array<[number, number]> = [];
-            route.steps.forEach((step: any) => {
-              const points = step.path || [];
-              points.forEach((point: any) => {
-                path.push([point.lng, point.lat]);
-              });
-            });
-
-            const newRoute: Route = {
-              id: `route-${Date.now()}`,
-              name: `${startName} → ${endName}`,
-              startName,
-              endName,
-              distance: route.distance,
-              duration: route.time,
-              difficulty: route.distance > 10000 ? 'hard' : route.distance > 5000 ? 'moderate' : 'easy',
-              type: 'oneWay',
-              path,
-              elevation: Math.floor(Math.random() * 200) + 50,
-            };
-
-            setResults([newRoute]);
-          } else {
-            setResults([]);
-          }
+          setResults([]);
+          return;
         }
-      );
+
+        const startPoi = result.poiList.pois[0];
+        const startLngLat = new window.AMap.LngLat(startPoi.location.lng, startPoi.location.lat);
+
+        // 搜索终点
+        placeSearch.search(endName, (status2: string, result2: any) => {
+          if (status2 !== 'complete' || !result2.poiList || !result2.poiList.pois[0]) {
+            setIsSearching(false);
+            setResults([]);
+            return;
+          }
+
+          const endPoi = result2.poiList.pois[0];
+          const endLngLat = new window.AMap.LngLat(endPoi.location.lng, endPoi.location.lat);
+
+          // 使用 Walking 进行路线规划
+          const walking = new window.AMap.Walking({
+            map: null, // 不自动显示在地图上
+            hideMarkers: true, // 隐藏默认标记
+          });
+
+          walking.search(startLngLat, endLngLat, (walkStatus: string, walkResult: any) => {
+            setIsSearching(false);
+            
+            if (walkStatus === 'complete' && walkResult.routes && walkResult.routes.length > 0) {
+              const route = walkResult.routes[0];
+              
+              // 提取路径点 (1.4.15 版本数据结构)
+              const path: Array<[number, number]> = [];
+              if (route.steps && Array.isArray(route.steps)) {
+                route.steps.forEach((step: any) => {
+                  // 1.4.15 版本的 path 可能是字符串或数组
+                  if (step.path) {
+                    if (typeof step.path === 'string') {
+                      // 如果是字符串，解析坐标点
+                      const points = step.path.split(';');
+                      points.forEach((point: string) => {
+                        const [lng, lat] = point.split(',').map(Number);
+                        if (!isNaN(lng) && !isNaN(lat)) {
+                          path.push([lng, lat]);
+                        }
+                      });
+                    } else if (Array.isArray(step.path)) {
+                      step.path.forEach((point: any) => {
+                        if (point.lng && point.lat) {
+                          path.push([point.lng, point.lat]);
+                        }
+                      });
+                    }
+                  }
+                });
+              }
+
+              // 如果路径为空，添加起点和终点
+              if (path.length === 0) {
+                path.push([startPoi.location.lng, startPoi.location.lat]);
+                path.push([endPoi.location.lng, endPoi.location.lat]);
+              }
+
+              const newRoute: Route = {
+                id: `route-${Date.now()}`,
+                name: `${startName} → ${endName}`,
+                startName,
+                endName,
+                distance: route.distance || 0,
+                duration: route.time || 0,
+                difficulty: (route.distance || 0) > 10000 ? 'hard' : (route.distance || 0) > 5000 ? 'moderate' : 'easy',
+                type: 'oneWay',
+                path,
+                elevation: Math.floor(Math.random() * 200) + 50,
+              };
+
+              setResults([newRoute]);
+            } else {
+              // 路线规划失败，创建直线路径
+              const path: Array<[number, number]> = [
+                [startPoi.location.lng, startPoi.location.lat],
+                [endPoi.location.lng, endPoi.location.lat],
+              ];
+              
+              const newRoute: Route = {
+                id: `route-${Date.now()}`,
+                name: `${startName} → ${endName}`,
+                startName,
+                endName,
+                distance: 0,
+                duration: 0,
+                difficulty: 'moderate',
+                type: 'oneWay',
+                path,
+                elevation: Math.floor(Math.random() * 200) + 50,
+              };
+
+              setResults([newRoute]);
+            }
+          });
+        });
+      });
     } catch (error) {
       console.error('搜索路线失败:', error);
       setIsSearching(false);

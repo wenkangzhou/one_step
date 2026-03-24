@@ -3,11 +3,13 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useMapStore, useNavigationStore } from '@/lib/store';
 import { AMapLoader } from './amap-loader';
+import type { PhotoMarker } from '@/lib/store';
 
 interface MapContainerProps {
   className?: string;
   showRoute?: boolean;
   routePath?: Array<[number, number]>;
+  photos?: PhotoMarker[];
   interactive?: boolean;
 }
 
@@ -15,6 +17,7 @@ function MapComponent({
   className,
   showRoute,
   routePath,
+  photos,
   interactive = true,
 }: MapContainerProps) {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -22,7 +25,7 @@ function MapComponent({
   const polylineRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
   const locationMarkerRef = useRef<any>(null);
-  
+
   const { center, zoom, setCenter, setZoom } = useMapStore();
   const { currentLocation, followMode, isNavigating } = useNavigationStore();
 
@@ -43,7 +46,6 @@ function MapComponent({
 
     mapInstance.current = map;
 
-    // 监听地图移动
     map.on('moveend', () => {
       const newCenter = map.getCenter();
       setCenter([newCenter.lng, newCenter.lat]);
@@ -59,107 +61,145 @@ function MapComponent({
     };
   }, [center, zoom, interactive, setCenter, setZoom]);
 
-  // 显示路线
+  // 显示路线和标记
   useEffect(() => {
-    if (!mapInstance.current || !showRoute || !routePath || routePath.length === 0) return;
+    if (!mapInstance.current) return;
 
-    // 清除之前的路线
+    // 清除之前的路线和标记
     if (polylineRef.current) {
       mapInstance.current.remove(polylineRef.current);
     }
-    markersRef.current.forEach(marker => {
+    markersRef.current.forEach((marker) => {
       if (marker) mapInstance.current.remove(marker);
     });
     markersRef.current = [];
 
-    // 绘制路线
+    if (!showRoute || !routePath || routePath.length === 0) return;
+
     const path = routePath.map(([lng, lat]) => new window.AMap.LngLat(lng, lat));
-    
-    // 创建 Polyline
+
+    // 绘制路线
     const polyline = new window.AMap.Polyline({
       path: path,
-      strokeColor: '#3d8a5d',
-      strokeWeight: 6,
+      strokeColor: '#e74c3c',
+      strokeWeight: 4,
       strokeOpacity: 0.9,
       strokeStyle: 'solid',
       lineJoin: 'round',
       lineCap: 'round',
+      showDir: true,
+      dirColor: '#fff',
     });
 
     mapInstance.current.add(polyline);
     polylineRef.current = polyline;
 
-    // 添加起点标记
+    // 起点标记 - 绿色圆形带"起"字
     const startMarker = new window.AMap.CircleMarker({
       center: path[0],
-      radius: 10,
-      fillColor: '#3d8a5d',
+      radius: 14,
+      fillColor: '#27ae60',
       fillOpacity: 1,
-      strokeColor: '#ffffff',
+      strokeColor: '#fff',
       strokeWeight: 3,
       zIndex: 100,
     });
 
-    // 添加终点标记
+    // 起点文字
+    const startLabel = new window.AMap.Text({
+      text: '起',
+      position: path[0],
+      offset: new window.AMap.Pixel(-8, -10),
+      style: {
+        color: '#fff',
+        'font-size': '14px',
+        'font-weight': 'bold',
+        'text-align': 'center',
+        'line-height': '20px',
+      },
+      zIndex: 101,
+    });
+
+    // 终点标记 - 红色圆形带"终"字
     const endMarker = new window.AMap.CircleMarker({
       center: path[path.length - 1],
-      radius: 10,
-      fillColor: '#f5a623',
+      radius: 14,
+      fillColor: '#e74c3c',
       fillOpacity: 1,
-      strokeColor: '#ffffff',
+      strokeColor: '#fff',
       strokeWeight: 3,
       zIndex: 100,
     });
 
-    // 添加文字标签
-    const startLabel = new window.AMap.Text({
-      text: '起点',
-      position: path[0],
-      offset: new window.AMap.Pixel(0, -25),
-      style: {
-        'background-color': '#3d8a5d',
-        'color': '#fff',
-        'padding': '4px 8px',
-        'border-radius': '4px',
-        'font-size': '12px',
-      },
-      zIndex: 101,
-    });
-
+    // 终点文字
     const endLabel = new window.AMap.Text({
-      text: '终点',
+      text: '终',
       position: path[path.length - 1],
-      offset: new window.AMap.Pixel(0, -25),
+      offset: new window.AMap.Pixel(-8, -10),
       style: {
-        'background-color': '#f5a623',
-        'color': '#fff',
-        'padding': '4px 8px',
-        'border-radius': '4px',
-        'font-size': '12px',
+        color: '#fff',
+        'font-size': '14px',
+        'font-weight': 'bold',
+        'text-align': 'center',
+        'line-height': '20px',
       },
       zIndex: 101,
     });
 
-    mapInstance.current.add([startMarker, endMarker, startLabel, endLabel]);
-    markersRef.current = [startMarker, endMarker, startLabel, endLabel];
+    mapInstance.current.add([startMarker, startLabel, endMarker, endLabel]);
+    markersRef.current = [startMarker, startLabel, endMarker, endLabel];
 
-    // 调整视野以显示完整路线
+    // 添加照片标记
+    if (photos && photos.length > 0) {
+      photos.forEach((photo) => {
+        const photoPosition = new window.AMap.LngLat(photo.position[0], photo.position[1]);
+        
+        // 照片标记点
+        const photoMarker = new window.AMap.CircleMarker({
+          center: photoPosition,
+          radius: 10,
+          fillColor: '#f39c12',
+          fillOpacity: 1,
+          strokeColor: '#fff',
+          strokeWeight: 2,
+          zIndex: 90,
+        });
+
+        // 相机图标（简化为圆点+提示）
+        const photoLabel = new window.AMap.Text({
+          text: '📷',
+          position: photoPosition,
+          offset: new window.AMap.Pixel(-10, -10),
+          style: {
+            'font-size': '16px',
+          },
+          zIndex: 91,
+        });
+
+        mapInstance.current.add([photoMarker, photoLabel]);
+        markersRef.current.push(photoMarker, photoLabel);
+      });
+    }
+
+    // 调整视野
     mapInstance.current.setFitView();
-  }, [showRoute, routePath]);
+  }, [showRoute, routePath, photos]);
 
   // 更新当前位置标记
   useEffect(() => {
     if (!mapInstance.current || !currentLocation) return;
 
     if (locationMarkerRef.current) {
-      locationMarkerRef.current.setCenter(new window.AMap.LngLat(currentLocation[0], currentLocation[1]));
+      locationMarkerRef.current.setCenter(
+        new window.AMap.LngLat(currentLocation[0], currentLocation[1])
+      );
     } else {
       const marker = new window.AMap.CircleMarker({
         center: new window.AMap.LngLat(currentLocation[0], currentLocation[1]),
         radius: 8,
-        fillColor: '#2563eb',
+        fillColor: '#3498db',
         fillOpacity: 1,
-        strokeColor: '#ffffff',
+        strokeColor: '#fff',
         strokeWeight: 2,
         zIndex: 200,
       });
@@ -167,9 +207,10 @@ function MapComponent({
       locationMarkerRef.current = marker;
     }
 
-    // 跟随模式下，地图跟随当前位置
     if (followMode && isNavigating) {
-      mapInstance.current.setCenter(new window.AMap.LngLat(currentLocation[0], currentLocation[1]));
+      mapInstance.current.setCenter(
+        new window.AMap.LngLat(currentLocation[0], currentLocation[1])
+      );
     }
   }, [currentLocation, followMode, isNavigating]);
 

@@ -2,11 +2,13 @@
 
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/navigation';
-import { MapPin, Clock, Footprints, TrendingUp, Navigation, X } from 'lucide-react';
+import { MapPin, Clock, Footprints, TrendingUp, Navigation, X, Camera, Mountain, Route } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { formatDistance, formatDuration } from '@/lib/utils';
 import { useSearchStore, useNavigationStore } from '@/lib/store';
+import { ElevationChart } from '@/components/charts/elevation-chart';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export function RouteDetail() {
   const { t } = useTranslation();
@@ -24,15 +26,15 @@ export function RouteDetail() {
   }[route.difficulty];
 
   const difficultyLabel = {
-    easy: t('route.difficulty.easy'),
-    moderate: t('route.difficulty.moderate'),
-    hard: t('route.difficulty.hard'),
+    easy: '简单',
+    moderate: '中等',
+    hard: '困难',
   }[route.difficulty];
 
   const typeLabel = {
-    loop: t('route.type.loop'),
-    oneWay: t('route.type.oneWay'),
-    outAndBack: t('route.type.outAndBack'),
+    loop: '环线',
+    oneWay: '单程',
+    outAndBack: '往返',
   }[route.type];
 
   const handleNavigate = () => {
@@ -42,80 +44,124 @@ export function RouteDetail() {
 
   return (
     <Sheet open={!!route} onOpenChange={() => selectRoute(null)}>
-      <SheetContent side="bottom" className="h-auto max-h-[70vh] sm:max-h-[500px] overflow-y-auto pb-safe">
-        <SheetHeader className="pb-4 pr-8">
-          <div className="flex items-start justify-between gap-2">
-            <SheetTitle className="text-lg sm:text-xl leading-tight">{route.name}</SheetTitle>
-            <span
-              className={`shrink-0 px-2.5 py-1 rounded-full text-xs font-medium ${difficultyColor}`}
-            >
-              {difficultyLabel}
-            </span>
+      <SheetContent side="bottom" className="h-[80vh] overflow-y-auto pb-safe">
+        {/* 头部信息 */}
+        <SheetHeader className="pb-4">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1 min-w-0">
+              <SheetTitle className="text-xl leading-tight pr-8">{route.name}</SheetTitle>
+              <div className="flex items-center gap-2 mt-2">
+                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${difficultyColor}`}>
+                  {difficultyLabel}
+                </span>
+                <span className="text-xs text-muted-foreground">{typeLabel}</span>
+              </div>
+            </div>
           </div>
         </SheetHeader>
 
-        <div className="space-y-4 sm:space-y-6 py-2 sm:py-4">
-          {/* 路线基本信息 */}
-          <div className="grid grid-cols-3 gap-4">
-            <div className="text-center p-3 bg-muted rounded-lg">
-              <Footprints className="h-5 w-5 mx-auto mb-1 text-forest-500" />
-              <p className="text-lg font-semibold">{formatDistance(route.distance)}</p>
-              <p className="text-xs text-muted-foreground">{t('route.distance')}</p>
-            </div>
-            <div className="text-center p-3 bg-muted rounded-lg">
-              <Clock className="h-5 w-5 mx-auto mb-1 text-sunrise-500" />
-              <p className="text-lg font-semibold">{formatDuration(route.duration)}</p>
-              <p className="text-xs text-muted-foreground">{t('route.duration')}</p>
-            </div>
-            <div className="text-center p-3 bg-muted rounded-lg">
-              <TrendingUp className="h-5 w-5 mx-auto mb-1 text-blue-500" />
-              <p className="text-lg font-semibold">
-                {route.elevation ? `${route.elevation}m` : '-'}
-              </p>
-              <p className="text-xs text-muted-foreground">{t('route.elevation')}</p>
-            </div>
+        {/* 统计数据 */}
+        <div className="grid grid-cols-4 gap-3 mb-6">
+          <div className="text-center p-3 bg-muted rounded-xl">
+            <Footprints className="h-5 w-5 mx-auto mb-1 text-forest-500" />
+            <p className="text-lg font-bold">{formatDistance(route.distance)}</p>
+            <p className="text-[10px] text-muted-foreground">距离</p>
           </div>
-
-          {/* 起点终点信息 */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-forest-100 dark:bg-forest-900 flex items-center justify-center">
-                <MapPin className="h-4 w-4 text-forest-600 dark:text-forest-400" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">{t('route.start')}</p>
-                <p className="font-medium">{route.startName}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-sunrise-100 dark:bg-sunrise-900 flex items-center justify-center">
-                <MapPin className="h-4 w-4 text-sunrise-600 dark:text-sunrise-400" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">{t('route.end')}</p>
-                <p className="font-medium">{route.endName}</p>
-              </div>
-            </div>
+          <div className="text-center p-3 bg-muted rounded-xl">
+            <Clock className="h-5 w-5 mx-auto mb-1 text-sunrise-500" />
+            <p className="text-lg font-bold">{formatDuration(route.duration)}</p>
+            <p className="text-[10px] text-muted-foreground">用时</p>
           </div>
-
-          {/* 类型标签 */}
-          <div className="flex gap-2">
-            <span className="text-sm px-3 py-1.5 rounded-full bg-muted">
-              {typeLabel}
-            </span>
+          <div className="text-center p-3 bg-muted rounded-xl">
+            <TrendingUp className="h-5 w-5 mx-auto mb-1 text-blue-500" />
+            <p className="text-lg font-bold">{route.elevation}m</p>
+            <p className="text-[10px] text-muted-foreground">爬升</p>
           </div>
-
-          {/* 开始导航按钮 */}
-          <div className="pt-2 pb-4 sm:pb-0">
-            <Button
-              onClick={handleNavigate}
-              className="w-full h-12 text-base bg-forest-600 hover:bg-forest-700 shadow-lg"
-            >
-              <Navigation className="h-5 w-5 mr-2" />
-              {t('route.startNavigation')}
-            </Button>
+          <div className="text-center p-3 bg-muted rounded-xl">
+            <Mountain className="h-5 w-5 mx-auto mb-1 text-purple-500" />
+            <p className="text-lg font-bold">{(route.distance / 1000).toFixed(1)}</p>
+            <p className="text-[10px] text-muted-foreground">公里</p>
           </div>
         </div>
+
+        {/* 起终点信息 */}
+        <div className="flex items-center gap-4 mb-6 p-4 bg-muted rounded-xl">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-3 h-3 rounded-full bg-green-500" />
+              <span className="text-sm font-medium">起点</span>
+            </div>
+            <p className="text-sm text-muted-foreground pl-5">{route.startName}</p>
+          </div>
+          {route.type !== 'loop' && (
+            <>
+              <div className="text-muted-foreground">
+                <Route className="h-5 w-5" />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-3 h-3 rounded-full bg-red-500" />
+                  <span className="text-sm font-medium">终点</span>
+                </div>
+                <p className="text-sm text-muted-foreground pl-5">{route.endName}</p>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Tab 切换 */}
+        <Tabs defaultValue="elevation" className="mb-6">
+          <TabsList className="w-full">
+            <TabsTrigger value="elevation" className="flex-1">
+              <TrendingUp className="h-4 w-4 mr-1" />
+              海拔
+            </TabsTrigger>
+            {route.photos && route.photos.length > 0 && (
+              <TabsTrigger value="photos" className="flex-1">
+                <Camera className="h-4 w-4 mr-1" />
+                照片 ({route.photos.length})
+              </TabsTrigger>
+            )}
+          </TabsList>
+
+          <TabsContent value="elevation" className="mt-4">
+            {route.elevationData ? (
+              <ElevationChart data={route.elevationData} />
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <TrendingUp className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                <p>暂无海拔数据</p>
+              </div>
+            )}
+          </TabsContent>
+
+          {route.photos && route.photos.length > 0 && (
+            <TabsContent value="photos" className="mt-4">
+              <div className="grid grid-cols-2 gap-3">
+                {route.photos.map((photo, index) => (
+                  <div
+                    key={index}
+                    className="aspect-square bg-muted rounded-lg flex items-center justify-center"
+                  >
+                    <div className="text-center">
+                      <Camera className="h-8 w-8 mx-auto mb-1 text-muted-foreground" />
+                      <p className="text-xs text-muted-foreground">{photo.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </TabsContent>
+          )}
+        </Tabs>
+
+        {/* 开始导航按钮 */}
+        <Button
+          onClick={handleNavigate}
+          className="w-full h-12 text-base bg-forest-600 hover:bg-forest-700 shadow-lg"
+        >
+          <Navigation className="h-5 w-5 mr-2" />
+          开始导航
+        </Button>
       </SheetContent>
     </Sheet>
   );

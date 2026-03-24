@@ -1,13 +1,10 @@
 'use client';
 
 import { useTranslation } from 'react-i18next';
-import { MapPin, Clock, Footprints, TrendingUp, Navigation } from 'lucide-react';
+import { MapPin, Clock, Footprints, TrendingUp, ChevronRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { formatDistance, formatDuration } from '@/lib/utils';
-import { useSearchStore, useNavigationStore } from '@/lib/store';
 import type { Route } from '@/lib/store';
-import { useRouter } from 'next/navigation';
 
 interface RouteCardProps {
   route: Route;
@@ -17,9 +14,6 @@ interface RouteCardProps {
 
 export function RouteCard({ route, onClick, isSelected }: RouteCardProps) {
   const { t } = useTranslation();
-  const router = useRouter();
-  const { selectRoute } = useSearchStore();
-  const { startNavigation } = useNavigationStore();
 
   const difficultyColor = {
     easy: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
@@ -33,12 +27,11 @@ export function RouteCard({ route, onClick, isSelected }: RouteCardProps) {
     hard: '困难',
   }[route.difficulty];
 
-  const handleStartNavigate = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    selectRoute(route);
-    startNavigation();
-    router.push('/navigate/');
-  };
+  const typeLabel = {
+    loop: '环线',
+    oneWay: '单程',
+    outAndBack: '往返',
+  }[route.type];
 
   return (
     <Card
@@ -51,55 +44,42 @@ export function RouteCard({ route, onClick, isSelected }: RouteCardProps) {
         {/* 路线名称和难度 */}
         <div className="flex items-start justify-between gap-2 mb-3">
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-base leading-tight">{route.name}</h3>
+            <h3 className="font-semibold text-base leading-tight line-clamp-2">{route.name}</h3>
             <p className="text-xs text-muted-foreground mt-1">
-              {route.startName} → {route.endName}
+              {route.startName} {route.type !== 'loop' && `→ ${route.endName}`}
             </p>
           </div>
-          <span className={`px-2 py-1 rounded-full text-xs font-medium shrink-0 ${difficultyColor}`}>
-            {difficultyLabel}
-          </span>
+          <div className="flex flex-col items-end gap-1">
+            <span className={`px-2 py-0.5 rounded-full text-xs font-medium shrink-0 ${difficultyColor}`}>
+              {difficultyLabel}
+            </span>
+            <span className="text-[10px] text-muted-foreground">{typeLabel}</span>
+          </div>
         </div>
 
         {/* 路线统计 */}
-        <div className="grid grid-cols-3 gap-2 mb-4">
-          <div className="text-center p-2 bg-muted rounded-lg">
-            <Footprints className="h-4 w-4 mx-auto mb-1 text-forest-500" />
-            <p className="text-sm font-semibold">{formatDistance(route.distance)}</p>
-            <p className="text-[10px] text-muted-foreground">距离</p>
+        <div className="grid grid-cols-3 gap-2">
+          <div className="flex items-center gap-1.5">
+            <Footprints className="h-3.5 w-3.5 text-forest-500" />
+            <span className="text-sm font-medium">{formatDistance(route.distance)}</span>
           </div>
-          <div className="text-center p-2 bg-muted rounded-lg">
-            <Clock className="h-4 w-4 mx-auto mb-1 text-sunrise-500" />
-            <p className="text-sm font-semibold">{formatDuration(route.duration)}</p>
-            <p className="text-[10px] text-muted-foreground">预计时间</p>
+          <div className="flex items-center gap-1.5">
+            <Clock className="h-3.5 w-3.5 text-sunrise-500" />
+            <span className="text-sm font-medium">{formatDuration(route.duration)}</span>
           </div>
-          <div className="text-center p-2 bg-muted rounded-lg">
-            <TrendingUp className="h-4 w-4 mx-auto mb-1 text-blue-500" />
-            <p className="text-sm font-semibold">{route.elevation}m</p>
-            <p className="text-[10px] text-muted-foreground">爬升</p>
+          <div className="flex items-center gap-1.5">
+            <TrendingUp className="h-3.5 w-3.5 text-blue-500" />
+            <span className="text-sm font-medium">{route.elevation}m</span>
           </div>
         </div>
 
-        {/* 起点终点信息 */}
-        <div className="space-y-2 mb-4">
-          <div className="flex items-center gap-2 text-sm">
-            <div className="w-2 h-2 rounded-full bg-forest-500 shrink-0" />
-            <span className="text-muted-foreground truncate">{route.startName}</span>
+        {/* 照片数量提示 */}
+        {route.photos && route.photos.length > 0 && (
+          <div className="mt-3 flex items-center gap-1 text-xs text-muted-foreground">
+            <span>📷</span>
+            <span>{route.photos.length} 张照片</span>
           </div>
-          <div className="flex items-center gap-2 text-sm">
-            <div className="w-2 h-2 rounded-full bg-sunrise-500 shrink-0" />
-            <span className="text-muted-foreground truncate">{route.endName}</span>
-          </div>
-        </div>
-
-        {/* 开始导航按钮 */}
-        <Button
-          onClick={handleStartNavigate}
-          className="w-full h-10 bg-forest-600 hover:bg-forest-700"
-        >
-          <Navigation className="h-4 w-4 mr-2" />
-          开始导航
-        </Button>
+        )}
       </CardContent>
     </Card>
   );

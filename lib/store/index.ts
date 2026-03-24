@@ -1,6 +1,17 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+export interface PhotoMarker {
+  position: [number, number];
+  url: string;
+  description: string;
+}
+
+export interface ElevationPoint {
+  distance: number;
+  elevation: number;
+}
+
 export interface Route {
   id: string;
   name: string;
@@ -11,7 +22,9 @@ export interface Route {
   difficulty: 'easy' | 'moderate' | 'hard';
   type: 'loop' | 'oneWay' | 'outAndBack';
   path: Array<[number, number]>;
-  elevation?: number;
+  elevation: number;
+  elevationData?: ElevationPoint[];
+  photos?: PhotoMarker[];
 }
 
 export interface SearchState {

@@ -156,8 +156,8 @@ function HomeContent() {
     <div className="flex flex-col h-screen">
       <Header />
       
-      {/* 搜索栏 */}
-      <div className="p-4 border-b bg-background">
+      {/* 搜索栏 - 与Logo对齐 */}
+      <div className="px-4 sm:px-6 lg:px-8 py-4 border-b bg-background">
         <SearchBox />
       </div>
 
@@ -165,7 +165,7 @@ function HomeContent() {
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         {/* 路线列表 - 移动端在下方，桌面端在左侧 */}
         <div className="lg:w-96 lg:border-r bg-background overflow-y-auto order-2 lg:order-1">
-          <div className="p-4 space-y-3">
+          <div className="px-4 sm:px-6 lg:px-8 py-4 space-y-3">
             {isSearching ? (
               <div className="text-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-forest-600 mx-auto mb-2"></div>

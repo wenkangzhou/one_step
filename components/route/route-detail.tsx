@@ -42,19 +42,19 @@ export function RouteDetail() {
 
   return (
     <Sheet open={!!route} onOpenChange={() => selectRoute(null)}>
-      <SheetContent side="bottom" className="h-[50vh] sm:h-[400px]">
-        <SheetHeader className="pb-4">
-          <div className="flex items-start justify-between">
-            <SheetTitle className="text-xl">{route.name}</SheetTitle>
+      <SheetContent side="bottom" className="h-auto max-h-[70vh] sm:max-h-[500px] overflow-y-auto pb-safe">
+        <SheetHeader className="pb-4 pr-8">
+          <div className="flex items-start justify-between gap-2">
+            <SheetTitle className="text-lg sm:text-xl leading-tight">{route.name}</SheetTitle>
             <span
-              className={`px-2.5 py-1 rounded-full text-xs font-medium ${difficultyColor}`}
+              className={`shrink-0 px-2.5 py-1 rounded-full text-xs font-medium ${difficultyColor}`}
             >
               {difficultyLabel}
             </span>
           </div>
         </SheetHeader>
 
-        <div className="space-y-6 py-4">
+        <div className="space-y-4 sm:space-y-6 py-2 sm:py-4">
           {/* 路线基本信息 */}
           <div className="grid grid-cols-3 gap-4">
             <div className="text-center p-3 bg-muted rounded-lg">
@@ -106,13 +106,15 @@ export function RouteDetail() {
           </div>
 
           {/* 开始导航按钮 */}
-          <Button
-            onClick={handleNavigate}
-            className="w-full h-12 text-base bg-forest-600 hover:bg-forest-700"
-          >
-            <Navigation className="h-5 w-5 mr-2" />
-            {t('route.startNavigation')}
-          </Button>
+          <div className="pt-2 pb-4 sm:pb-0">
+            <Button
+              onClick={handleNavigate}
+              className="w-full h-12 text-base bg-forest-600 hover:bg-forest-700 shadow-lg"
+            >
+              <Navigation className="h-5 w-5 mr-2" />
+              {t('route.startNavigation')}
+            </Button>
+          </div>
         </div>
       </SheetContent>
     </Sheet>

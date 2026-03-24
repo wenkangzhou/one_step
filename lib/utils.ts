@@ -22,12 +22,12 @@ export function formatDuration(seconds: number): string {
   return `${minutes}m`;
 }
 
-export function debounce<T extends (...args: unknown[]) => unknown>(
-  func: T,
+export function debounce(
+  func: (...args: any[]) => void,
   wait: number
-): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout;
-  return (...args: Parameters<T>) => {
+): (...args: any[]) => void {
+  let timeout: ReturnType<typeof setTimeout>;
+  return (...args: any[]) => {
     clearTimeout(timeout);
     timeout = setTimeout(() => func(...args), wait);
   };

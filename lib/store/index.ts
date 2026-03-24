@@ -39,7 +39,7 @@ const createSearchStore = (set: any): SearchStore => ({
   isLoading: false,
   selectedRoute: null,
   setQuery: (query) => set({ query }),
-  setResults: (results) => set({ results }),
+  setResults: (results) => set({ results, isLoading: false }),
   setLoading: (isLoading) => set({ isLoading }),
   selectRoute: (route) => set({ selectedRoute: route }),
   addRecentSearch: (query) =>
@@ -111,7 +111,7 @@ interface MapStore extends MapState {
 }
 
 export const useMapStore = create<MapStore>()((set) => ({
-  center: [116.397428, 39.90923],
+  center: [116.397428, 39.90923], // 北京中心
   zoom: 12,
   isMapLoaded: false,
   setCenter: (center) => set({ center }),

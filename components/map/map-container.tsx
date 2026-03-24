@@ -1,9 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useCallback } from 'react';
-import { useMapStore } from '@/lib/store';
+import { useMapStore, useNavigationStore } from '@/lib/store';
 import { AMapLoader } from './amap-loader';
-import { useNavigationStore } from '@/lib/store';
 
 interface MapContainerProps {
   className?: string;
@@ -25,7 +24,7 @@ function MapComponent({
   const locationMarkerRef = useRef<any>(null);
   
   const { center, zoom, setCenter, setZoom } = useMapStore();
-  const { isNavigating, currentLocation, followMode } = useNavigationStore();
+  const { currentLocation, followMode, isNavigating } = useNavigationStore();
 
   // 初始化地图
   useEffect(() => {
@@ -39,7 +38,6 @@ function MapComponent({
       dragEnable: interactive,
       zoomEnable: interactive,
       doubleClickZoom: interactive,
-      // 强制使用 Canvas 渲染，避免 WebGL 兼容性问题
       renderMode: 'canvas',
     });
 
@@ -69,11 +67,15 @@ function MapComponent({
     if (polylineRef.current) {
       mapInstance.current.remove(polylineRef.current);
     }
-    markersRef.current.forEach(marker => mapInstance.current.remove(marker));
+    markersRef.current.forEach(marker => {
+      if (marker) mapInstance.current.remove(marker);
+    });
     markersRef.current = [];
 
     // 绘制路线
     const path = routePath.map(([lng, lat]) => new window.AMap.LngLat(lng, lat));
+    
+    // 创建 Polyline
     const polyline = new window.AMap.Polyline({
       path: path,
       strokeColor: '#3d8a5d',
@@ -82,33 +84,64 @@ function MapComponent({
       strokeStyle: 'solid',
       lineJoin: 'round',
       lineCap: 'round',
-      showDir: true,
     });
 
     mapInstance.current.add(polyline);
     polylineRef.current = polyline;
 
-    // 添加起点和终点标记 (使用圆点标记)
+    // 添加起点标记
     const startMarker = new window.AMap.CircleMarker({
       center: path[0],
-      radius: 12,
+      radius: 10,
       fillColor: '#3d8a5d',
       fillOpacity: 1,
       strokeColor: '#ffffff',
-      strokeWeight: 2,
+      strokeWeight: 3,
+      zIndex: 100,
     });
 
+    // 添加终点标记
     const endMarker = new window.AMap.CircleMarker({
       center: path[path.length - 1],
-      radius: 12,
+      radius: 10,
       fillColor: '#f5a623',
       fillOpacity: 1,
       strokeColor: '#ffffff',
-      strokeWeight: 2,
+      strokeWeight: 3,
+      zIndex: 100,
     });
 
-    mapInstance.current.add([startMarker, endMarker]);
-    markersRef.current = [startMarker, endMarker];
+    // 添加文字标签
+    const startLabel = new window.AMap.Text({
+      text: '起点',
+      position: path[0],
+      offset: new window.AMap.Pixel(0, -25),
+      style: {
+        'background-color': '#3d8a5d',
+        'color': '#fff',
+        'padding': '4px 8px',
+        'border-radius': '4px',
+        'font-size': '12px',
+      },
+      zIndex: 101,
+    });
+
+    const endLabel = new window.AMap.Text({
+      text: '终点',
+      position: path[path.length - 1],
+      offset: new window.AMap.Pixel(0, -25),
+      style: {
+        'background-color': '#f5a623',
+        'color': '#fff',
+        'padding': '4px 8px',
+        'border-radius': '4px',
+        'font-size': '12px',
+      },
+      zIndex: 101,
+    });
+
+    mapInstance.current.add([startMarker, endMarker, startLabel, endLabel]);
+    markersRef.current = [startMarker, endMarker, startLabel, endLabel];
 
     // 调整视野以显示完整路线
     mapInstance.current.setFitView();
@@ -123,11 +156,12 @@ function MapComponent({
     } else {
       const marker = new window.AMap.CircleMarker({
         center: new window.AMap.LngLat(currentLocation[0], currentLocation[1]),
-        radius: 10,
+        radius: 8,
         fillColor: '#2563eb',
         fillOpacity: 1,
         strokeColor: '#ffffff',
         strokeWeight: 2,
+        zIndex: 200,
       });
       mapInstance.current.add(marker);
       locationMarkerRef.current = marker;
@@ -143,22 +177,20 @@ function MapComponent({
   const handleLocate = useCallback(() => {
     if (!mapInstance.current || !window.AMap) return;
 
-    const geolocation = new window.AMap.Geolocation({
-      enableHighAccuracy: true,
-      timeout: 10000,
-      buttonPosition: 'RB',
-      buttonOffset: new window.AMap.Pixel(10, 20),
-      zoomToAccuracy: true,
-    });
-
-    geolocation.getCurrentPosition((status: string, result: any) => {
-      if (status === 'complete') {
-        const { position } = result;
-        mapInstance.current.setCenter([position.lng, position.lat]);
-      } else {
-        console.error('定位失败:', result.message);
-      }
-    });
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          mapInstance.current.setCenter(new window.AMap.LngLat(longitude, latitude));
+          mapInstance.current.setZoom(15);
+        },
+        (error) => {
+          console.error('定位失败:', error);
+          alert('定位失败，请检查定位权限');
+        },
+        { enableHighAccuracy: true }
+      );
+    }
   }, []);
 
   return (
@@ -167,7 +199,7 @@ function MapComponent({
       {interactive && (
         <button
           onClick={handleLocate}
-          className="absolute bottom-4 right-4 z-10 p-2 bg-white dark:bg-gray-800 rounded-full shadow-lg hover:shadow-xl transition-shadow"
+          className="absolute bottom-20 right-4 z-10 p-3 bg-white dark:bg-gray-800 rounded-full shadow-lg hover:shadow-xl transition-shadow"
           title="定位到当前位置"
         >
           <svg

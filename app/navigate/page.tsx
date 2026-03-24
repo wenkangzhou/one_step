@@ -32,16 +32,16 @@ function NavigateContent() {
   return (
     <div className="fixed inset-0">
       {/* 地图层 */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 z-0">
         <MapContainer
           showRoute
           routePath={selectedRoute.path}
-          interactive={false}
+          interactive={true}
         />
       </div>
 
-      {/* 导航面板层 */}
-      <div className="absolute inset-0 pointer-events-none">
+      {/* 导航面板层 - 更高层级覆盖地图 */}
+      <div className="absolute inset-0 z-[100] pointer-events-none">
         <div className="pointer-events-auto h-full">
           <NavigationPanel />
         </div>

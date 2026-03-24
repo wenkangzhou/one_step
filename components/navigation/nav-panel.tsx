@@ -98,13 +98,13 @@ export function NavigationPanel() {
   return (
     <div className="relative w-full h-full">
       {/* 顶部导航栏 */}
-      <div className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-black/60 to-transparent p-4">
-        <div className="flex items-center justify-between">
+      <div className="absolute top-0 left-0 right-0 z-[110] bg-gradient-to-b from-black/60 to-transparent p-4 pt-safe">
+        <div className="flex items-center justify-between max-w-md mx-auto">
           <Button
             variant="ghost"
             size="icon"
             onClick={handleExit}
-            className="bg-white/90 dark:bg-black/50 hover:bg-white text-foreground"
+            className="h-10 w-10 rounded-full bg-white/90 dark:bg-black/50 hover:bg-white text-foreground shadow-lg"
           >
             <X className="h-5 w-5" />
           </Button>
@@ -115,7 +115,7 @@ export function NavigationPanel() {
             variant="ghost"
             size="icon"
             onClick={toggleFollowMode}
-            className={`${
+            className={`h-10 w-10 rounded-full shadow-lg ${
               followMode
                 ? 'bg-forest-500 text-white'
                 : 'bg-white/90 dark:bg-black/50 text-foreground'
@@ -127,11 +127,11 @@ export function NavigationPanel() {
       </div>
 
       {/* 底部导航信息面板 */}
-      <div className="absolute bottom-0 left-0 right-0 z-10 bg-background/95 backdrop-blur-sm border-t rounded-t-2xl p-4 pb-safe">
+      <div className="absolute bottom-0 left-0 right-0 z-[110] bg-background/95 backdrop-blur-sm border-t rounded-t-2xl p-4 sm:p-6 pb-safe">
         <div className="max-w-md mx-auto">
           {/* 目的地信息 */}
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-full bg-forest-100 dark:bg-forest-900 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-forest-100 dark:bg-forest-900 flex items-center justify-center shrink-0">
               <Navigation className="h-5 w-5 text-forest-600 dark:text-forest-400" />
             </div>
             <div className="flex-1 min-w-0">
@@ -141,17 +141,17 @@ export function NavigationPanel() {
           </div>
 
           {/* 距离和时间 */}
-          <div className="grid grid-cols-2 gap-4 mb-4">
-            <div className="bg-muted rounded-xl p-4 text-center">
-              <p className="text-2xl font-bold text-forest-600 dark:text-forest-400">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-4">
+            <div className="bg-muted rounded-xl p-3 sm:p-4 text-center">
+              <p className="text-xl sm:text-2xl font-bold text-forest-600 dark:text-forest-400">
                 {formatDistance(remainingDistance)}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
                 {t('navigation.remainingDistance')}
               </p>
             </div>
-            <div className="bg-muted rounded-xl p-4 text-center">
-              <p className="text-2xl font-bold text-sunrise-600 dark:text-sunrise-400">
+            <div className="bg-muted rounded-xl p-3 sm:p-4 text-center">
+              <p className="text-xl sm:text-2xl font-bold text-sunrise-600 dark:text-sunrise-400">
                 {formatDuration(remainingDuration)}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
@@ -164,7 +164,7 @@ export function NavigationPanel() {
           <Button
             onClick={handleExit}
             variant="outline"
-            className="w-full h-12"
+            className="w-full h-12 shadow-sm"
           >
             <X className="h-5 w-5 mr-2" />
             {t('navigation.exit')}

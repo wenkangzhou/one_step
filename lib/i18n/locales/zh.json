@@ -1,0 +1,78 @@
+{
+  "app": {
+    "name": "一步野",
+    "tagline": "发现你的下一段徒步旅程"
+  },
+  "nav": {
+    "search": "搜索路线",
+    "navigate": "开始导航",
+    "back": "返回",
+    "home": "首页"
+  },
+  "search": {
+    "placeholder": "搜索地点、路线...",
+    "currentLocation": "当前位置",
+    "popularRoutes": "热门路线",
+    "recentSearches": "最近搜索",
+    "clear": "清除",
+    "noResults": "未找到相关路线"
+  },
+  "route": {
+    "distance": "距离",
+    "duration": "预计时间",
+    "difficulty": {
+      "title": "难度",
+      "easy": "简单",
+      "moderate": "中等",
+      "hard": "困难"
+    },
+    "type": {
+      "title": "类型",
+      "loop": "环线",
+      "oneWay": "单程",
+      "outAndBack": "往返"
+    },
+    "start": "起点",
+    "end": "终点",
+    "elevation": "海拔爬升",
+    "startNavigation": "开始导航",
+    "routeInfo": "路线信息",
+    "steps": "导航步骤"
+  },
+  "navigation": {
+    "title": "导航中",
+    "remainingDistance": "剩余距离",
+    "remainingTime": "预计剩余",
+    "arrived": "已到达目的地",
+    "recenter": "重新居中",
+    "exit": "退出导航",
+    "followMode": "跟随模式",
+    "freeMode": "自由模式"
+  },
+  "common": {
+    "loading": "加载中...",
+    "error": "出错了",
+    "retry": "重试",
+    "cancel": "取消",
+    "confirm": "确认",
+    "save": "保存",
+    "delete": "删除",
+    "edit": "编辑",
+    "close": "关闭",
+    "open": "打开",
+    "km": "公里",
+    "m": "米",
+    "min": "分钟",
+    "hour": "小时"
+  },
+  "theme": {
+    "light": "浅色模式",
+    "dark": "深色模式",
+    "system": "跟随系统"
+  },
+  "language": {
+    "title": "语言",
+    "zh": "中文",
+    "en": "English"
+  }
+}

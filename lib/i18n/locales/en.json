@@ -1,0 +1,78 @@
+{
+  "app": {
+    "name": "One Step",
+    "tagline": "Discover Your Next Hiking Adventure"
+  },
+  "nav": {
+    "search": "Search Routes",
+    "navigate": "Start Navigation",
+    "back": "Back",
+    "home": "Home"
+  },
+  "search": {
+    "placeholder": "Search places, routes...",
+    "currentLocation": "Current Location",
+    "popularRoutes": "Popular Routes",
+    "recentSearches": "Recent Searches",
+    "clear": "Clear",
+    "noResults": "No routes found"
+  },
+  "route": {
+    "distance": "Distance",
+    "duration": "Duration",
+    "difficulty": {
+      "title": "Difficulty",
+      "easy": "Easy",
+      "moderate": "Moderate",
+      "hard": "Hard"
+    },
+    "type": {
+      "title": "Type",
+      "loop": "Loop",
+      "oneWay": "One Way",
+      "outAndBack": "Out & Back"
+    },
+    "start": "Start",
+    "end": "End",
+    "elevation": "Elevation Gain",
+    "startNavigation": "Start Navigation",
+    "routeInfo": "Route Info",
+    "steps": "Navigation Steps"
+  },
+  "navigation": {
+    "title": "Navigating",
+    "remainingDistance": "Remaining",
+    "remainingTime": "ETA",
+    "arrived": "You have arrived",
+    "recenter": "Recenter",
+    "exit": "Exit Navigation",
+    "followMode": "Follow Mode",
+    "freeMode": "Free Mode"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "open": "Open",
+    "km": "km",
+    "m": "m",
+    "min": "min",
+    "hour": "hr"
+  },
+  "theme": {
+    "light": "Light Mode",
+    "dark": "Dark Mode",
+    "system": "System"
+  },
+  "language": {
+    "title": "Language",
+    "zh": "中文",
+    "en": "English"
+  }
+}

@@ -40,7 +40,7 @@ function HomeContent() {
   const [isLoadingRoutes, setIsLoadingRoutes] = useState(true);
   const { setResults, selectRoute, selectedRoute } = useSearchStore();
   const { updateLocation } = useNavigationStore();
-  const { setCenter } = useMapStore();
+  const { setCenter, setZoom } = useMapStore();
   const watchIdRef = useRef<number | null>(null);
 
   // 加载路线 - 只执行一次
@@ -132,20 +132,28 @@ function HomeContent() {
     setFilteredRoutes(filtered);
   }, [searchQuery, selectedDifficulty, routes]);
 
-  // 点击路线 - 显示详情
+  // 点击路线 - 显示详情并放大
   const handleRouteClick = useCallback((route: Route) => {
     selectRoute(route);
-  }, [selectRoute]);
-
-  // 点击图例 - 只定位不显示详情
-  const handleLegendClick = useCallback((route: Route) => {
+    // 定位到路线中点并放大到100m标尺
     if (route.path && route.path.length > 0) {
-      // 定位到路线中点
       const midIndex = Math.floor(route.path.length / 2);
       const [lng, lat] = route.path[midIndex];
       setCenter([lng, lat]);
+      setZoom(17); // 100m 标尺
     }
-  }, [setCenter]);
+  }, [selectRoute, setCenter, setZoom]);
+
+  // 点击图例 - 只定位并放大
+  const handleLegendClick = useCallback((route: Route) => {
+    if (route.path && route.path.length > 0) {
+      // 定位到路线中点并放大到100m标尺
+      const midIndex = Math.floor(route.path.length / 2);
+      const [lng, lat] = route.path[midIndex];
+      setCenter([lng, lat]);
+      setZoom(17); // 100m 标尺
+    }
+  }, [setCenter, setZoom]);
 
   const difficultyOptions = [
     { value: 'easy', label: '简单', color: 'bg-green-100 text-green-700 border-green-200' },

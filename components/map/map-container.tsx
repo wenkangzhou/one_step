@@ -62,23 +62,37 @@ function MapComponent({
       setZoomLevel(newZoom);
     });
 
-    // 获取用户位置并居中
+    // 获取用户位置并居中（带兜底处理）
+    const hasLocatedRef = { current: false };
     if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
-          const { latitude, longitude } = pos.coords;
+          const { latitude, longitude, accuracy } = pos.coords;
+          // 精度太差的位置忽略（超过1km）
+          if (accuracy > 1000) {
+            console.log('定位精度太差，忽略:', accuracy, 'm');
+            return;
+          }
           const userLocation: [number, number] = [longitude, latitude];
           updateLocation(userLocation);
-          // 只有在不是导航模式且未初始化时才设置中心
-          if (!isNavigationMode && !isInitializedRef.current) {
+          // 非导航模式下定位到当前位置
+          if (!isNavigationMode && !hasLocatedRef.current) {
+            hasLocatedRef.current = true;
             map.setCenter(new window.AMap.LngLat(longitude, latitude));
             map.setZoom(14);
           }
         },
         (err) => {
-          console.log('Geolocation failed:', err);
+          // 错误处理：静默失败，使用默认位置（上海）
+          const errorMessages: Record<number, string> = {
+            1: '定位权限被拒绝',
+            2: '位置不可用',
+            3: '定位超时',
+          };
+          console.log('定位失败:', errorMessages[err.code] || `错误码: ${err.code}`);
+          // 不显示错误提示，静默使用默认位置
         },
-        { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
       );
     }
 

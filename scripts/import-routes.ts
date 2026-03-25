@@ -5,13 +5,6 @@
  * 
  * 用法:
  *   npm run import:routes
- * 
- * 流程:
- *   1. 读取 gpx/ 目录下的 .gpx 和 .kml 文件
- *   2. 解析轨迹数据（坐标、海拔、距离、爬升）
- *   3. 智能采样（每 50-100m 一个点）
- *   4. 生成/更新 lib/data/routes.ts
- *   5. 生成/更新 lib/data/routes-meta.json（如果不存在）
  */
 
 import * as fs from 'fs';
@@ -33,11 +26,11 @@ interface RouteData {
   id: string;
   fileName: string;
   name: string;
-  distance: number;      // 米
-  duration: number;      // 分钟（估算）
-  elevation: number;     // 爬升高度（米）
+  distance: number;
+  duration: number;
+  elevation: number;
   elevationData: ElevationPoint[];
-  path: Array<[number, number]>;  // [[lng, lat], ...]
+  path: Array<[number, number]>;
   startLocation: [number, number];
   endLocation: [number, number];
   minElevation: number;
@@ -75,7 +68,56 @@ function calculateElevationGain(coordinates: number[][]): number {
   return Math.round(gain);
 }
 
-// 智能采样（按距离采样，控制点数量）
+// 从 KML 的 gx:Track 提取坐标（合并所有有效 Track）
+function extractKMLTrackCoordinates(xml: Document): number[][] | null {
+  const tracks = xml.getElementsByTagName('gx:Track');
+  const allCoordinates: number[][] = [];
+  
+  // 收集所有 Track 的坐标（过滤掉太短的，可能是标记点）
+  for (let i = 0; i < tracks.length; i++) {
+    const track = tracks[i];
+    const coordNodes = track.getElementsByTagName('gx:coord');
+    
+    // 忽略少于 50 个点的 Track（可能是拍照标记）
+    if (coordNodes.length < 50) continue;
+    
+    for (let j = 0; j < coordNodes.length; j++) {
+      const coordText = coordNodes[j].textContent;
+      if (coordText) {
+        // gx:coord 格式: "lng lat elevation" 或 "lng lat"
+        const parts = coordText.trim().split(/\s+/).map(Number);
+        if (parts.length >= 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+          allCoordinates.push([parts[0], parts[1], parts[2] ?? 0]);
+        }
+      }
+    }
+  }
+  
+  if (allCoordinates.length > 0) {
+    return allCoordinates;
+  }
+  
+  // 备用：查找 LineString
+  const lineStrings = xml.getElementsByTagName('LineString');
+  const lineStringCoords: number[][] = [];
+  for (let i = 0; i < lineStrings.length; i++) {
+    const coordNode = lineStrings[i].getElementsByTagName('coordinates')[0];
+    if (coordNode && coordNode.textContent) {
+      const coordText = coordNode.textContent.trim();
+      const lines = coordText.split(/\s+/);
+      for (const line of lines) {
+        const parts = line.split(',').map(Number);
+        if (parts.length >= 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+          lineStringCoords.push([parts[0], parts[1], parts[2] ?? 0]);
+        }
+      }
+    }
+  }
+  
+  return lineStringCoords.length > 0 ? lineStringCoords : null;
+}
+
+// 智能采样
 function sampleCoordinates(
   coordinates: number[][],
   targetPoints: number = 300
@@ -84,7 +126,6 @@ function sampleCoordinates(
     return coordinates as Array<[number, number, number]>;
   }
 
-  // 计算总距离
   let totalDistance = 0;
   const distances: number[] = [0];
   for (let i = 1; i < coordinates.length; i++) {
@@ -95,7 +136,6 @@ function sampleCoordinates(
     distances.push(totalDistance);
   }
 
-  // 按距离均匀采样
   const interval = totalDistance / (targetPoints - 1);
   const sampled: Array<[number, number, number]> = [coordinates[0] as [number, number, number]];
   let nextDistance = interval;
@@ -112,13 +152,11 @@ function sampleCoordinates(
     nextDistance += interval;
   }
 
-  // 确保包含终点
   sampled.push(coordinates[coordinates.length - 1] as [number, number, number]);
-
   return sampled;
 }
 
-// 生成海拔数据（等距采样点）
+// 生成海拔数据
 function generateElevationData(
   coordinates: Array<[number, number, number]>,
   totalDistance: number
@@ -156,36 +194,51 @@ function parseFile(filePath: string): RouteData | null {
     const content = fs.readFileSync(filePath, 'utf-8');
     const xml = new DOMParser().parseFromString(content, 'text/xml');
 
-    // 选择解析器
-    const isKML = ext === '.kml';
-    const geojson = isKML ? kml(xml) : gpx(xml);
+    let coordinates: number[][] = [];
 
-    if (!geojson.features || geojson.features.length === 0) {
-      console.log(`  ⚠️  警告: ${fileName} 没有轨迹数据`);
-      return null;
-    }
-
-    // 提取所有坐标（支持多段轨迹合并）
-    let allCoordinates: number[][] = [];
-    
-    for (const feature of geojson.features) {
-      const geom = feature.geometry;
-      if (geom.type === 'LineString') {
-        allCoordinates.push(...geom.coordinates);
-      } else if (geom.type === 'MultiLineString') {
-        for (const line of geom.coordinates) {
-          allCoordinates.push(...line);
+    if (ext === '.kml') {
+      // 优先解析 gx:Track
+      const trackCoords = extractKMLTrackCoordinates(xml);
+      if (trackCoords) {
+        coordinates = trackCoords;
+      } else {
+        // 使用 togeojson 作为备用
+        const geojson = kml(xml);
+        for (const feature of geojson.features) {
+          const geom = feature.geometry;
+          if (geom.type === 'LineString') {
+            coordinates.push(...geom.coordinates);
+          } else if (geom.type === 'MultiLineString') {
+            for (const line of geom.coordinates) {
+              coordinates.push(...line);
+            }
+          }
+        }
+      }
+    } else {
+      // GPX
+      const geojson = gpx(xml);
+      for (const feature of geojson.features) {
+        const geom = feature.geometry;
+        if (geom.type === 'LineString') {
+          coordinates.push(...geom.coordinates);
+        } else if (geom.type === 'MultiLineString') {
+          for (const line of geom.coordinates) {
+            coordinates.push(...line);
+          }
         }
       }
     }
 
-    if (allCoordinates.length < 2) {
-      console.log(`  ⚠️  警告: ${fileName} 轨迹点太少`);
+    if (coordinates.length < 2) {
+      console.log(`  ⚠️  警告: ${fileName} 轨迹点太少 (${coordinates.length})`);
       return null;
     }
 
+    console.log(`     原始轨迹点: ${coordinates.length}`);
+
     // 采样
-    const sampled = sampleCoordinates(allCoordinates);
+    const sampled = sampleCoordinates(coordinates);
     
     // 计算总距离
     let totalDistance = 0;
@@ -196,10 +249,10 @@ function parseFile(filePath: string): RouteData | null {
     }
 
     // 计算爬升
-    const elevationGain = calculateElevationGain(allCoordinates);
+    const elevationGain = calculateElevationGain(coordinates);
 
     // 提取海拔范围
-    const elevations = allCoordinates.map(c => c[2] ?? 0).filter(e => e !== 0);
+    const elevations = coordinates.map(c => c[2] ?? 0).filter(e => e !== 0);
     const minElevation = elevations.length > 0 ? Math.min(...elevations) : 0;
     const maxElevation = elevations.length > 0 ? Math.max(...elevations) : 0;
 
@@ -211,13 +264,12 @@ function parseFile(filePath: string): RouteData | null {
 
     // 估算时长（按 4km/h 平均速度 + 爬升时间 30min/500m）
     const duration = Math.round(
-      (totalDistance / 1000) / 4 * 60 + // 行走时间
-      (elevationGain / 500) * 30        // 爬升时间
+      (totalDistance / 1000) / 4 * 60 +
+      (elevationGain / 500) * 30
     );
 
     // 从文件名生成默认名称和 id
     const baseName = fileName.replace(ext, '');
-    // 生成 id：移除扩展名，保留中文，替换空格和特殊字符为 -
     const id = baseName.toLowerCase()
       .replace(/\s+/g, '-')
       .replace(/[^\w\u4e00-\u9fa5-]/g, '')
@@ -308,7 +360,7 @@ export function getRouteById(id: string): Route | undefined {
   console.log(`\n✅ 已生成: ${ROUTES_FILE}`);
 }
 
-// 更新元数据文件（保留已有，添加新的）
+// 更新元数据文件
 function updateMetaFile(routes: RouteData[], existingMeta: Record<string, any>) {
   const newMeta: Record<string, any> = { ...existingMeta };
   let hasNew = false;
@@ -334,7 +386,7 @@ function updateMetaFile(routes: RouteData[], existingMeta: Record<string, any>) 
   // 清理已删除的（保留 _ 开头的说明字段）
   const currentFiles = new Set(routes.map(r => r.fileName));
   for (const key of Object.keys(newMeta)) {
-    if (key.startsWith('_')) continue; // 保留说明字段
+    if (key.startsWith('_')) continue;
     if (!currentFiles.has(key)) {
       delete newMeta[key];
       console.log(`  🗑️  移除元数据: ${key}`);
@@ -404,8 +456,9 @@ async function main() {
   console.log(`\n🎉 成功导入 ${routes.length} 条路线!`);
   console.log('\n下一步:');
   console.log('  1. 编辑 lib/data/routes-meta.json 补充路线信息');
-  console.log('  2. git add . && git commit -m "add: 新增路线"');
-  console.log('  3. git push');
+  console.log('  2. npm run dev 预览效果');
+  console.log('  3. git add . && git commit -m "add: 新增路线"');
+  console.log('  4. git push');
 }
 
 main().catch(err => {

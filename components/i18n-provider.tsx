@@ -11,9 +11,15 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     setMounted(true);
   }, []);
 
-  // 避免服务端渲染问题
+  // 避免服务端渲染问题，等待客户端挂载
   if (!mounted) {
-    return <>{children}</>;
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="flex items-center justify-center h-screen">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-forest-600"></div>
+        </div>
+      </div>
+    );
   }
 
   return <I18nextProvider i18n={i18n}>{children}</I18nextProvider>;

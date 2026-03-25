@@ -9,6 +9,7 @@ const generateElevationData = (distance: number, elevation: number) => {
   const data = [];
   for (let i = 0; i <= points; i++) {
     const ratio = i / points;
+    // 模拟起伏地形
     const baseElevation = 50 + Math.sin(ratio * Math.PI * 3) * elevation * 0.3 + Math.random() * 20;
     data.push({
       distance: Math.round(distance * ratio),
@@ -18,15 +19,28 @@ const generateElevationData = (distance: number, elevation: number) => {
   return data;
 };
 
+// 生成路径点 - 根据起点终点生成带偏移的路径
+const generatePath = (start: [number, number], end: [number, number], waypoints: [number, number][] = []): Array<[number, number]> => {
+  const path: Array<[number, number]> = [start];
+  
+  // 添加途经点
+  for (const wp of waypoints) {
+    path.push(wp);
+  }
+  
+  path.push(end);
+  return path;
+};
+
 // 上海/苏州经典徒步路线
-export const presetRoutes: Omit<Route, 'path' | 'elevationData'>[] = [
+export const mockRoutes: Route[] = [
   // ===== 上海路线 =====
   {
     id: 'shanghai-1',
     name: '佘山国家森林公园环线',
     description: '上海唯一的自然山林胜地，西佘山海拔100.8米为上海陆地最高点。途径佘山天文台、天主教堂，适合家庭休闲徒步。',
     distance: 5200,
-    duration: 7200,
+    duration: 120,
     elevation: 180,
     difficulty: 'easy',
     type: 'loop',
@@ -34,6 +48,7 @@ export const presetRoutes: Omit<Route, 'path' | 'elevationData'>[] = [
     endLocation: [121.1965, 31.0968],
     startName: '佘山森林公园北门',
     endName: '佘山森林公园北门',
+    path: [],
     images: ['/images/routes/sheshan.jpg'],
     rating: 4.3,
     reviewCount: 328,
@@ -54,7 +69,7 @@ export const presetRoutes: Omit<Route, 'path' | 'elevationData'>[] = [
     name: '世纪公园晨跑环线',
     description: '上海市中心最大的生态公园，环湖步道平整宽阔，是上海市民最喜爱的跑步和散步路线之一。',
     distance: 5000,
-    duration: 3600,
+    duration: 60,
     elevation: 15,
     difficulty: 'easy',
     type: 'loop',
@@ -62,6 +77,7 @@ export const presetRoutes: Omit<Route, 'path' | 'elevationData'>[] = [
     endLocation: [121.5523, 31.2156],
     startName: '世纪公园7号门',
     endName: '世纪公园7号门',
+    path: [],
     images: ['/images/routes/century-park.jpg'],
     rating: 4.5,
     reviewCount: 856,
@@ -82,7 +98,7 @@ export const presetRoutes: Omit<Route, 'path' | 'elevationData'>[] = [
     name: '天马山越野挑战',
     description: '上海最高峰（海拔98.2米），山势陡峭，野趣十足。山上有著名的护珠塔（斜塔），是上海越野跑爱好者的训练圣地。',
     distance: 8200,
-    duration: 10800,
+    duration: 180,
     elevation: 320,
     difficulty: 'medium',
     type: 'loop',
@@ -90,6 +106,7 @@ export const presetRoutes: Omit<Route, 'path' | 'elevationData'>[] = [
     endLocation: [121.2285, 31.0432],
     startName: '天马山东门',
     endName: '天马山东门',
+    path: [],
     images: ['/images/routes/tianma.jpg'],
     rating: 4.2,
     reviewCount: 156,
@@ -110,7 +127,7 @@ export const presetRoutes: Omit<Route, 'path' | 'elevationData'>[] = [
     name: '滨江大道夜跑线',
     description: '从陆家嘴到世博园区，沿黄浦江两岸的经典路线。夜景绝美，路面平整，是上海夜跑最热门的路线之一。',
     distance: 10600,
-    duration: 7200,
+    duration: 120,
     elevation: 25,
     difficulty: 'easy',
     type: 'oneWay',
@@ -118,6 +135,7 @@ export const presetRoutes: Omit<Route, 'path' | 'elevationData'>[] = [
     endLocation: [121.4852, 31.1856],
     startName: '陆家嘴滨江大道',
     endName: '世博公园',
+    path: [],
     images: ['/images/routes/bund.jpg'],
     rating: 4.7,
     reviewCount: 1205,
@@ -139,7 +157,7 @@ export const presetRoutes: Omit<Route, 'path' | 'elevationData'>[] = [
     name: '灵岩山-大焦山环线',
     description: '苏州最经典的徒步路线，被称为"灵白线"的精华段。穿越灵岩山、大焦山，路况多变有挑战性，是苏州户外入门必选。',
     distance: 8500,
-    duration: 12600,
+    duration: 210,
     elevation: 420,
     difficulty: 'medium',
     type: 'loop',
@@ -147,6 +165,7 @@ export const presetRoutes: Omit<Route, 'path' | 'elevationData'>[] = [
     endLocation: [120.5058, 31.2568],
     startName: '灵岩山景区门口',
     endName: '灵岩山景区门口',
+    path: [],
     images: ['/images/routes/lingyan.jpg'],
     rating: 4.6,
     reviewCount: 568,
@@ -167,7 +186,7 @@ export const presetRoutes: Omit<Route, 'path' | 'elevationData'>[] = [
     name: '穹窿山爱心线',
     description: '位于苏州西郊，是苏州最高峰（海拔341.7米）。路线走下来GPS轨迹会画出一颗爱心，深受情侣和户外爱好者喜爱。',
     distance: 12800,
-    duration: 18000,
+    duration: 300,
     elevation: 680,
     difficulty: 'hard',
     type: 'loop',
@@ -175,6 +194,7 @@ export const presetRoutes: Omit<Route, 'path' | 'elevationData'>[] = [
     endLocation: [120.3856, 31.2585],
     startName: '穹窿山景区北门',
     endName: '穹窿山景区北门',
+    path: [],
     images: ['/images/routes/qionglong.jpg'],
     rating: 4.4,
     reviewCount: 234,
@@ -195,7 +215,7 @@ export const presetRoutes: Omit<Route, 'path' | 'elevationData'>[] = [
     name: '旺山-七子山穿越',
     description: '位于苏州城南，是相对小众但风景极佳的路线。途径旺山生态园、七子山，可远眺太湖，春季茶园景色宜人。',
     distance: 11500,
-    duration: 16200,
+    duration: 270,
     elevation: 520,
     difficulty: 'medium',
     type: 'oneWay',
@@ -203,6 +223,7 @@ export const presetRoutes: Omit<Route, 'path' | 'elevationData'>[] = [
     endLocation: [120.5585, 31.1856],
     startName: '旺山景区',
     endName: '七子山',
+    path: [],
     images: ['/images/routes/wangshan.jpg'],
     rating: 4.3,
     reviewCount: 189,
@@ -223,7 +244,7 @@ export const presetRoutes: Omit<Route, 'path' | 'elevationData'>[] = [
     name: '大阳山翡翠湖环线',
     description: '大阳山国家森林公园内的隐藏秘境，翡翠色的矿坑湖水美不胜收。路线相对平缓，适合亲子和摄影爱好者。',
     distance: 6800,
-    duration: 9000,
+    duration: 150,
     elevation: 280,
     difficulty: 'easy',
     type: 'loop',
@@ -231,6 +252,7 @@ export const presetRoutes: Omit<Route, 'path' | 'elevationData'>[] = [
     endLocation: [120.4285, 31.3056],
     startName: '大阳山国家森林公园',
     endName: '大阳山国家森林公园',
+    path: [],
     images: ['/images/routes/dayang.jpg'],
     rating: 4.5,
     reviewCount: 312,
@@ -249,23 +271,28 @@ export const presetRoutes: Omit<Route, 'path' | 'elevationData'>[] = [
 ];
 
 // 为每条路线生成路径和海拔数据
-export const processedRoutes: Route[] = presetRoutes.map(route => {
+mockRoutes.forEach(route => {
   const start = route.startLocation!;
   const end = route.endLocation!;
   
+  // 根据途经点生成路径
   const waypoints = route.waypoints?.map(wp => [wp.lng, wp.lat] as [number, number]) || [];
   
+  // 生成中间点让路径更自然
   const fullPath: Array<[number, number]> = [start];
   
   for (let i = 0; i < waypoints.length; i++) {
     const prev = i === 0 ? start : waypoints[i - 1];
     const curr = waypoints[i];
+    
+    // 在中间插入一个点
     const midLng = (prev[0] + curr[0]) / 2 + (Math.random() - 0.5) * 0.002;
     const midLat = (prev[1] + curr[1]) / 2 + (Math.random() - 0.5) * 0.002;
     fullPath.push([midLng, midLat]);
     fullPath.push(curr);
   }
   
+  // 最后到终点
   if (waypoints.length > 0) {
     const lastWp = waypoints[waypoints.length - 1];
     const midLng = (lastWp[0] + end[0]) / 2 + (Math.random() - 0.5) * 0.002;
@@ -275,19 +302,6 @@ export const processedRoutes: Route[] = presetRoutes.map(route => {
   
   fullPath.push(end);
   
-  return {
-    ...route,
-    path: fullPath,
-    elevationData: generateElevationData(route.distance, route.elevation),
-  };
+  route.path = fullPath;
+  route.elevationData = generateElevationData(route.distance, route.elevation);
 });
-
-// 获取所有路线
-export function getAllRoutes(): Route[] {
-  return processedRoutes;
-}
-
-// 根据ID获取路线
-export function getRouteById(id: string): Route | undefined {
-  return processedRoutes.find(route => route.id === id);
-}

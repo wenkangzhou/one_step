@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import { mockRoutes } from '@/lib/data/mock-routes';
+import { routes as importedRoutes } from '@/lib/data/routes';
 
 // 海拔点
 export interface ElevationPoint {
@@ -16,6 +16,8 @@ export interface Route {
   distance: number; // 米
   duration: number; // 分钟
   elevation: number; // 米
+  minElevation?: number; // 最低海拔
+  maxElevation?: number; // 最高海拔
   difficulty: 'easy' | 'medium' | 'hard';
   type?: 'loop' | 'oneWay' | 'outAndBack';
   path: Array<[number, number]>; // [lng, lat] 坐标点数组
@@ -27,6 +29,8 @@ export interface Route {
   rating?: number;
   reviewCount?: number;
   bestSeason?: string[];
+  tags?: string[]; // 标签
+  fileName?: string; // 源文件名（导入用）
   waypoints?: { lng: number; lat: number; name?: string }[];
   photos?: { url: string; lat: number; lng: number; description?: string }[];
   elevationData?: ElevationPoint[];
@@ -104,7 +108,7 @@ export const useSearchStore = create<SearchStore>()(
           return;
         }
         const searchTerm = query.toLowerCase();
-        const results = mockRoutes.filter(
+        const results = importedRoutes.filter(
           (route) =>
             route.name.toLowerCase().includes(searchTerm) ||
             route.description.toLowerCase().includes(searchTerm)

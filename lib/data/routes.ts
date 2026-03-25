@@ -1,293 +1,38 @@
-import type { Route } from '@/lib/store';
+import type { Route, ElevationPoint } from '@/lib/store';
+import routesMeta from './routes-meta.json';
 
-// 上海/苏州经典徒步路线 - 基于真实轨迹整理
-// 坐标来源：公开GPX轨迹文件提取
+// 自动生成，请勿手动编辑此文件
+// 运行 npm run import:routes 重新生成
 
-// 生成海拔数据
-const generateElevationData = (distance: number, elevation: number) => {
-  const points = 30;
-  const data = [];
-  for (let i = 0; i <= points; i++) {
-    const ratio = i / points;
-    const baseElevation = 50 + Math.sin(ratio * Math.PI * 3) * elevation * 0.3 + Math.random() * 20;
-    data.push({
-      distance: Math.round(distance * ratio),
-      elevation: Math.round(baseElevation + (elevation * ratio * 0.5)),
-    });
+export const routes: Route[] = [
+  {
+    id: '虞山雄鹰线官方版',
+    fileName: '虞山雄鹰线官方版.kml',
+    name: routesMeta['虞山雄鹰线官方版.kml']?.name ?? '虞山雄鹰线官方版',
+    description: routesMeta['虞山雄鹰线官方版.kml']?.description ?? '',
+    distance: 10095,
+    duration: 207,
+    elevation: 930,
+    elevationData: [{"distance":0,"elevation":22},{"distance":36,"elevation":23},{"distance":71,"elevation":23},{"distance":100,"elevation":22},{"distance":128,"elevation":22},{"distance":163,"elevation":21},{"distance":193,"elevation":21},{"distance":224,"elevation":27},{"distance":255,"elevation":36},{"distance":290,"elevation":38},{"distance":327,"elevation":41},{"distance":361,"elevation":45},{"distance":398,"elevation":49},{"distance":433,"elevation":52},{"distance":469,"elevation":57},{"distance":496,"elevation":62},{"distance":532,"elevation":68},{"distance":567,"elevation":74},{"distance":603,"elevation":79},{"distance":639,"elevation":84},{"distance":675,"elevation":88},{"distance":710,"elevation":93},{"distance":741,"elevation":104},{"distance":750,"elevation":101},{"distance":784,"elevation":105},{"distance":818,"elevation":112},{"distance":855,"elevation":117},{"distance":889,"elevation":121},{"distance":923,"elevation":125},{"distance":958,"elevation":128},{"distance":994,"elevation":130},{"distance":1029,"elevation":134},{"distance":1064,"elevation":139},{"distance":1099,"elevation":142},{"distance":1135,"elevation":146},{"distance":1169,"elevation":149},{"distance":1204,"elevation":155},{"distance":1240,"elevation":160},{"distance":1274,"elevation":163},{"distance":1295,"elevation":174},{"distance":1329,"elevation":173},{"distance":1365,"elevation":172},{"distance":1398,"elevation":170},{"distance":1433,"elevation":167},{"distance":1470,"elevation":164},{"distance":1505,"elevation":164},{"distance":1536,"elevation":167},{"distance":1564,"elevation":161},{"distance":1597,"elevation":156},{"distance":1632,"elevation":158},{"distance":1667,"elevation":158},{"distance":1704,"elevation":161},{"distance":1737,"elevation":159},{"distance":1773,"elevation":163},{"distance":1809,"elevation":169},{"distance":1844,"elevation":173},{"distance":1878,"elevation":176},{"distance":1912,"elevation":175},{"distance":1941,"elevation":174},{"distance":1960,"elevation":169},{"distance":1994,"elevation":176},{"distance":2029,"elevation":181},{"distance":2064,"elevation":188},{"distance":2098,"elevation":194},{"distance":2133,"elevation":200},{"distance":2167,"elevation":204},{"distance":2186,"elevation":194},{"distance":2204,"elevation":188},{"distance":2238,"elevation":171},{"distance":2268,"elevation":159},{"distance":2302,"elevation":149},{"distance":2337,"elevation":136},{"distance":2371,"elevation":122},{"distance":2405,"elevation":105},{"distance":2438,"elevation":87},{"distance":2471,"elevation":70},{"distance":2502,"elevation":58},{"distance":2536,"elevation":45},{"distance":2571,"elevation":31},{"distance":2607,"elevation":28},{"distance":2643,"elevation":26},{"distance":2678,"elevation":26},{"distance":2713,"elevation":25},{"distance":2749,"elevation":23},{"distance":2784,"elevation":24},{"distance":2819,"elevation":28},{"distance":2856,"elevation":28},{"distance":2891,"elevation":27},{"distance":2926,"elevation":26},{"distance":2962,"elevation":28},{"distance":2990,"elevation":46},{"distance":3025,"elevation":62},{"distance":3054,"elevation":72},{"distance":3088,"elevation":90},{"distance":3121,"elevation":102},{"distance":3156,"elevation":120},{"distance":3193,"elevation":139},{"distance":3225,"elevation":153},{"distance":3243,"elevation":164},{"distance":3271,"elevation":172},{"distance":3301,"elevation":198},{"distance":3332,"elevation":210},{"distance":3367,"elevation":208},{"distance":3401,"elevation":206},{"distance":3437,"elevation":208},{"distance":3472,"elevation":209},{"distance":3508,"elevation":214},{"distance":3544,"elevation":219},{"distance":3579,"elevation":217},{"distance":3614,"elevation":214},{"distance":3649,"elevation":218},{"distance":3683,"elevation":226},{"distance":3709,"elevation":234},{"distance":3744,"elevation":248},{"distance":3764,"elevation":253},{"distance":3797,"elevation":251},{"distance":3832,"elevation":243},{"distance":3865,"elevation":239},{"distance":3891,"elevation":239},{"distance":3921,"elevation":242},{"distance":3945,"elevation":244},{"distance":3981,"elevation":244},{"distance":4018,"elevation":242},{"distance":4051,"elevation":240},{"distance":4067,"elevation":230},{"distance":4102,"elevation":222},{"distance":4129,"elevation":221},{"distance":4159,"elevation":221},{"distance":4195,"elevation":216},{"distance":4220,"elevation":215},{"distance":4256,"elevation":209},{"distance":4291,"elevation":202},{"distance":4323,"elevation":214},{"distance":4352,"elevation":231},{"distance":4387,"elevation":242},{"distance":4422,"elevation":251},{"distance":4457,"elevation":255},{"distance":4492,"elevation":255},{"distance":4524,"elevation":252},{"distance":4557,"elevation":247},{"distance":4592,"elevation":240},{"distance":4627,"elevation":238},{"distance":4661,"elevation":238},{"distance":4696,"elevation":236},{"distance":4730,"elevation":231},{"distance":4765,"elevation":222},{"distance":4800,"elevation":213},{"distance":4835,"elevation":202},{"distance":4871,"elevation":193},{"distance":4907,"elevation":185},{"distance":4943,"elevation":188},{"distance":4977,"elevation":185},{"distance":5013,"elevation":176},{"distance":5049,"elevation":169},{"distance":5084,"elevation":167},{"distance":5119,"elevation":163},{"distance":5154,"elevation":156},{"distance":5190,"elevation":152},{"distance":5225,"elevation":152},{"distance":5261,"elevation":153},{"distance":5297,"elevation":153},{"distance":5334,"elevation":154},{"distance":5369,"elevation":153},{"distance":5405,"elevation":151},{"distance":5441,"elevation":149},{"distance":5476,"elevation":141},{"distance":5511,"elevation":131},{"distance":5547,"elevation":124},{"distance":5583,"elevation":115},{"distance":5614,"elevation":116},{"distance":5649,"elevation":129},{"distance":5684,"elevation":135},{"distance":5719,"elevation":144},{"distance":5754,"elevation":155},{"distance":5788,"elevation":168},{"distance":5824,"elevation":176},{"distance":5859,"elevation":189},{"distance":5892,"elevation":197},{"distance":5920,"elevation":203},{"distance":5951,"elevation":202},{"distance":5986,"elevation":203},{"distance":6019,"elevation":202},{"distance":6055,"elevation":193},{"distance":6091,"elevation":184},{"distance":6126,"elevation":175},{"distance":6162,"elevation":167},{"distance":6198,"elevation":159},{"distance":6234,"elevation":149},{"distance":6269,"elevation":144},{"distance":6304,"elevation":132},{"distance":6342,"elevation":123},{"distance":6376,"elevation":116},{"distance":6412,"elevation":108},{"distance":6448,"elevation":98},{"distance":6483,"elevation":89},{"distance":6518,"elevation":81},{"distance":6554,"elevation":74},{"distance":6589,"elevation":69},{"distance":6625,"elevation":60},{"distance":6659,"elevation":53},{"distance":6695,"elevation":49},{"distance":6730,"elevation":43},{"distance":6766,"elevation":41},{"distance":6801,"elevation":37},{"distance":6835,"elevation":31},{"distance":6871,"elevation":30},{"distance":6905,"elevation":35},{"distance":6939,"elevation":39},{"distance":6959,"elevation":61},{"distance":6983,"elevation":68},{"distance":7017,"elevation":75},{"distance":7053,"elevation":81},{"distance":7089,"elevation":85},{"distance":7124,"elevation":91},{"distance":7159,"elevation":95},{"distance":7194,"elevation":98},{"distance":7230,"elevation":105},{"distance":7265,"elevation":112},{"distance":7300,"elevation":116},{"distance":7336,"elevation":123},{"distance":7371,"elevation":130},{"distance":7406,"elevation":136},{"distance":7442,"elevation":145},{"distance":7476,"elevation":151},{"distance":7512,"elevation":161},{"distance":7546,"elevation":165},{"distance":7582,"elevation":168},{"distance":7615,"elevation":174},{"distance":7646,"elevation":190},{"distance":7681,"elevation":200},{"distance":7715,"elevation":215},{"distance":7751,"elevation":230},{"distance":7786,"elevation":245},{"distance":7820,"elevation":255},{"distance":7856,"elevation":259},{"distance":7891,"elevation":259},{"distance":7926,"elevation":262},{"distance":7957,"elevation":265},{"distance":7993,"elevation":267},{"distance":8027,"elevation":270},{"distance":8064,"elevation":272},{"distance":8098,"elevation":272},{"distance":8134,"elevation":273},{"distance":8169,"elevation":273},{"distance":8206,"elevation":273},{"distance":8242,"elevation":272},{"distance":8277,"elevation":269},{"distance":8312,"elevation":265},{"distance":8348,"elevation":264},{"distance":8384,"elevation":263},{"distance":8418,"elevation":262},{"distance":8453,"elevation":263},{"distance":8487,"elevation":264},{"distance":8523,"elevation":269},{"distance":8559,"elevation":272},{"distance":8595,"elevation":275},{"distance":8631,"elevation":275},{"distance":8667,"elevation":275},{"distance":8702,"elevation":273},{"distance":8738,"elevation":271},{"distance":8773,"elevation":264},{"distance":8809,"elevation":257},{"distance":8844,"elevation":250},{"distance":8879,"elevation":244},{"distance":8915,"elevation":236},{"distance":8949,"elevation":229},{"distance":8985,"elevation":226},{"distance":9020,"elevation":224},{"distance":9055,"elevation":219},{"distance":9091,"elevation":211},{"distance":9126,"elevation":206},{"distance":9162,"elevation":197},{"distance":9196,"elevation":188},{"distance":9233,"elevation":178},{"distance":9268,"elevation":168},{"distance":9302,"elevation":159},{"distance":9337,"elevation":152},{"distance":9372,"elevation":143},{"distance":9406,"elevation":132},{"distance":9441,"elevation":121},{"distance":9477,"elevation":116},{"distance":9513,"elevation":106},{"distance":9548,"elevation":97},{"distance":9585,"elevation":89},{"distance":9620,"elevation":83},{"distance":9656,"elevation":78},{"distance":9688,"elevation":74},{"distance":9711,"elevation":69},{"distance":9746,"elevation":65},{"distance":9781,"elevation":62},{"distance":9817,"elevation":57},{"distance":9852,"elevation":52},{"distance":9885,"elevation":46},{"distance":9912,"elevation":44},{"distance":9946,"elevation":42},{"distance":9983,"elevation":41},{"distance":10018,"elevation":43},{"distance":10037,"elevation":42},{"distance":10064,"elevation":43},{"distance":10095,"elevation":46}],
+    minElevation: 21,
+    maxElevation: 276,
+    path: [[120.697697,31.682029],[120.697365,31.681865],[120.697035,31.681728],[120.69683,31.681925],[120.696726,31.682161],[120.696507,31.682409],[120.696196,31.682342],[120.695873,31.682355],[120.695727,31.682107],[120.695791,31.681792],[120.695815,31.681461],[120.695693,31.68117],[120.695589,31.680854],[120.695508,31.680545],[120.695452,31.680225],[120.695382,31.679994],[120.695169,31.679722],[120.695003,31.679436],[120.694738,31.679212],[120.694589,31.678916],[120.694477,31.678602],[120.694389,31.678297],[120.694129,31.678134],[120.694143,31.678048],[120.694454,31.677893],[120.694723,31.677689],[120.694581,31.677382],[120.694474,31.677087],[120.694356,31.6768],[120.694328,31.676487],[120.694207,31.676185],[120.694069,31.675892],[120.693976,31.675587],[120.693911,31.675276],[120.693838,31.674954],[120.693894,31.674657],[120.694105,31.674391],[120.694267,31.674102],[120.694498,31.673868],[120.694489,31.673679],[120.694138,31.67375],[120.693937,31.674025],[120.693601,31.674111],[120.693234,31.67407],[120.692953,31.673839],[120.692635,31.673684],[120.692392,31.673497],[120.692232,31.673286],[120.691893,31.673239],[120.691572,31.673403],[120.691275,31.673586],[120.690983,31.673807],[120.690671,31.673948],[120.690347,31.674121],[120.690029,31.674286],[120.689701,31.674442],[120.689353,31.674512],[120.688997,31.674484],[120.688693,31.674497],[120.688574,31.674352],[120.688215,31.674378],[120.687847,31.674418],[120.687513,31.674554],[120.68719,31.674683],[120.686928,31.6749],[120.686567,31.674951],[120.686532,31.674784],[120.68669,31.674695],[120.686915,31.67446],[120.687158,31.674286],[120.687433,31.674087],[120.687642,31.673829],[120.687873,31.673593],[120.688048,31.673331],[120.688148,31.673047],[120.688343,31.672793],[120.688596,31.672615],[120.688823,31.672384],[120.689179,31.672291],[120.689545,31.672214],[120.68987,31.672047],[120.690227,31.671967],[120.690575,31.671844],[120.690901,31.671681],[120.691165,31.671462],[120.691414,31.671225],[120.691684,31.670986],[120.691834,31.670705],[120.691833,31.670385],[120.691738,31.670077],[120.69204,31.670067],[120.692396,31.670132],[120.692675,31.670018],[120.693034,31.669998],[120.693284,31.669797],[120.693529,31.66956],[120.693838,31.669355],[120.694082,31.669152],[120.694171,31.669011],[120.694295,31.66924],[120.694612,31.669193],[120.694814,31.668978],[120.695166,31.668877],[120.695455,31.668689],[120.695735,31.668476],[120.695901,31.668192],[120.696017,31.667887],[120.696194,31.667601],[120.696522,31.667459],[120.696825,31.667279],[120.697163,31.667139],[120.697516,31.66713],[120.69778,31.667047],[120.698124,31.666953],[120.698337,31.666924],[120.69868,31.666968],[120.699043,31.667019],[120.699398,31.666988],[120.699605,31.666836],[120.699877,31.666701],[120.700093,31.666588],[120.70017,31.666267],[120.700398,31.666006],[120.700652,31.665793],[120.700502,31.665743],[120.700794,31.66554],[120.700948,31.665341],[120.701114,31.665104],[120.701436,31.664946],[120.701613,31.664775],[120.701894,31.664555],[120.702016,31.664257],[120.702344,31.664298],[120.702649,31.664354],[120.70287,31.664602],[120.703101,31.664854],[120.703344,31.665091],[120.703612,31.664875],[120.703848,31.664677],[120.704194,31.664714],[120.704545,31.664603],[120.704739,31.664871],[120.704883,31.665148],[120.705096,31.665411],[120.705442,31.665485],[120.7058,31.665581],[120.70616,31.665637],[120.70652,31.665715],[120.706888,31.66579],[120.707261,31.665826],[120.707627,31.665915],[120.707984,31.665978],[120.708351,31.666052],[120.708722,31.666134],[120.709086,31.666186],[120.709447,31.666258],[120.709813,31.666311],[120.709991,31.666592],[120.71007,31.666903],[120.710051,31.667227],[120.710039,31.66755],[120.71003,31.667881],[120.710016,31.668199],[120.710082,31.668519],[120.710235,31.668809],[120.710161,31.669117],[120.709875,31.669321],[120.709543,31.66948],[120.709231,31.66966],[120.708912,31.669711],[120.708539,31.66968],[120.708169,31.669643],[120.707803,31.66961],[120.707441,31.669564],[120.707081,31.669569],[120.706737,31.66943],[120.706405,31.669298],[120.706056,31.669231],[120.705797,31.669342],[120.705581,31.669553],[120.705289,31.669747],[120.705429,31.67002],[120.705618,31.670298],[120.705876,31.670534],[120.706104,31.670791],[120.706368,31.671014],[120.706616,31.671263],[120.706807,31.67154],[120.707131,31.671698],[120.707449,31.671865],[120.707713,31.672116],[120.707955,31.672342],[120.708208,31.672586],[120.708451,31.672837],[120.708675,31.673083],[120.70893,31.673312],[120.709238,31.673497],[120.709485,31.673742],[120.709621,31.674037],[120.709711,31.674337],[120.709431,31.67455],[120.709091,31.674672],[120.708712,31.674712],[120.708374,31.674851],[120.708017,31.674899],[120.707657,31.674802],[120.707342,31.674664],[120.706979,31.674646],[120.70679,31.674731],[120.7066,31.674599],[120.706376,31.67435],[120.706084,31.674153],[120.705802,31.673931],[120.705578,31.673678],[120.705396,31.673406],[120.70514,31.673179],[120.704907,31.672927],[120.704614,31.672726],[120.704292,31.672586],[120.703937,31.672466],[120.703577,31.672388],[120.703301,31.67218],[120.703023,31.671958],[120.702677,31.671866],[120.702303,31.671827],[120.702025,31.671634],[120.701713,31.67145],[120.701473,31.671228],[120.701526,31.670959],[120.701615,31.670652],[120.701627,31.670347],[120.701689,31.670027],[120.701776,31.669716],[120.701938,31.669444],[120.702187,31.669204],[120.702352,31.668916],[120.702367,31.668602],[120.702043,31.668578],[120.701693,31.668696],[120.701332,31.668743],[120.700952,31.668688],[120.700599,31.668753],[120.700313,31.668962],[120.700011,31.669156],[120.699734,31.66939],[120.699395,31.669525],[120.699025,31.669543],[120.698686,31.669408],[120.698327,31.669298],[120.697983,31.669171],[120.697628,31.669142],[120.697375,31.669372],[120.697288,31.669676],[120.697317,31.669999],[120.697428,31.670306],[120.697618,31.670584],[120.69783,31.670849],[120.697989,31.671152],[120.698122,31.671443],[120.69813,31.671768],[120.69818,31.672077],[120.698233,31.672396],[120.698381,31.672687],[120.698514,31.672984],[120.698709,31.673254],[120.698825,31.673545],[120.698848,31.673869],[120.69883,31.674188],[120.699001,31.674465],[120.699005,31.674785],[120.699055,31.675101],[120.698876,31.675381],[120.698819,31.675689],[120.698709,31.676003],[120.69857,31.676296],[120.69853,31.676602],[120.698446,31.676907],[120.698469,31.677224],[120.698545,31.677515],[120.698616,31.677833],[120.698551,31.678144],[120.698474,31.678462],[120.69854,31.678773],[120.698579,31.679105],[120.698665,31.679407],[120.698997,31.67957],[120.69934,31.679599],[120.699562,31.679669],[120.699509,31.679983],[120.69961,31.680288],[120.6997,31.680595],[120.699582,31.680899],[120.699464,31.681178],[120.699209,31.681284],[120.698851,31.681316],[120.6985,31.681456],[120.698166,31.681593],[120.698183,31.681766],[120.697902,31.681798],[120.697778,31.682053]],
+    startLocation: [120.697697,31.682029],
+    endLocation: [120.697778,31.682053],
+    startName: routesMeta['虞山雄鹰线官方版.kml']?.startName ?? '起点',
+    endName: routesMeta['虞山雄鹰线官方版.kml']?.endName ?? '终点',
+    difficulty: (routesMeta['虞山雄鹰线官方版.kml']?.difficulty as 'easy' | 'medium' | 'hard') ?? 'medium',
+    type: (routesMeta['虞山雄鹰线官方版.kml']?.type as 'loop' | 'oneWay' | 'outAndBack') ?? 'oneWay',
+    bestSeason: routesMeta['虞山雄鹰线官方版.kml']?.bestSeason ?? [],
+    tags: routesMeta['虞山雄鹰线官方版.kml']?.tags ?? [],
+    images: routesMeta['虞山雄鹰线官方版.kml']?.images ?? [],
   }
-  return data;
-};
-
-// 上海/苏州经典徒步路线
-export const presetRoutes: Omit<Route, 'path' | 'elevationData'>[] = [
-  // ===== 上海路线 =====
-  {
-    id: 'shanghai-1',
-    name: '佘山国家森林公园环线',
-    description: '上海唯一的自然山林胜地，西佘山海拔100.8米为上海陆地最高点。途径佘山天文台、天主教堂，适合家庭休闲徒步。',
-    distance: 5200,
-    duration: 7200,
-    elevation: 180,
-    difficulty: 'easy',
-    type: 'loop',
-    startLocation: [121.1965, 31.0968],
-    endLocation: [121.1965, 31.0968],
-    startName: '佘山森林公园北门',
-    endName: '佘山森林公园北门',
-    images: ['/images/routes/sheshan.jpg'],
-    rating: 4.3,
-    reviewCount: 328,
-    bestSeason: ['春季', '秋季', '冬季'],
-    waypoints: [
-      { lng: 121.1985, lat: 31.0955, name: '佘山天文台' },
-      { lng: 121.1998, lat: 31.0942, name: '天主教堂' },
-      { lng: 121.2012, lat: 31.0958, name: '观景台' },
-      { lng: 121.2005, lat: 31.0975, name: '竹林步道' },
-    ],
-    photos: [
-      { lng: 121.1985, lat: 31.0955, url: '/photos/sheshan-1.jpg', description: '佘山天文台' },
-      { lng: 121.1998, lat: 31.0942, url: '/photos/sheshan-2.jpg', description: '天主教堂' },
-    ],
-  },
-  {
-    id: 'shanghai-2',
-    name: '世纪公园晨跑环线',
-    description: '上海市中心最大的生态公园，环湖步道平整宽阔，是上海市民最喜爱的跑步和散步路线之一。',
-    distance: 5000,
-    duration: 3600,
-    elevation: 15,
-    difficulty: 'easy',
-    type: 'loop',
-    startLocation: [121.5523, 31.2156],
-    endLocation: [121.5523, 31.2156],
-    startName: '世纪公园7号门',
-    endName: '世纪公园7号门',
-    images: ['/images/routes/century-park.jpg'],
-    rating: 4.5,
-    reviewCount: 856,
-    bestSeason: ['春季', '夏季', '秋季', '冬季'],
-    waypoints: [
-      { lng: 121.5545, lat: 31.2185, name: '镜天湖' },
-      { lng: 121.5568, lat: 31.2172, name: '音乐喷泉' },
-      { lng: 121.5552, lat: 31.2145, name: '鸽子广场' },
-      { lng: 121.5535, lat: 31.2132, name: '荷花池' },
-    ],
-    photos: [
-      { lng: 121.5545, lat: 31.2185, url: '/photos/century-1.jpg', description: '镜天湖' },
-      { lng: 121.5568, lat: 31.2172, url: '/photos/century-2.jpg', description: '音乐喷泉' },
-    ],
-  },
-  {
-    id: 'shanghai-3',
-    name: '天马山越野挑战',
-    description: '上海最高峰（海拔98.2米），山势陡峭，野趣十足。山上有著名的护珠塔（斜塔），是上海越野跑爱好者的训练圣地。',
-    distance: 8200,
-    duration: 10800,
-    elevation: 320,
-    difficulty: 'medium',
-    type: 'loop',
-    startLocation: [121.2285, 31.0432],
-    endLocation: [121.2285, 31.0432],
-    startName: '天马山东门',
-    endName: '天马山东门',
-    images: ['/images/routes/tianma.jpg'],
-    rating: 4.2,
-    reviewCount: 156,
-    bestSeason: ['春季', '秋季', '冬季'],
-    waypoints: [
-      { lng: 121.2305, lat: 31.0415, name: '护珠塔' },
-      { lng: 121.2325, lat: 31.0398, name: '最高峰' },
-      { lng: 121.2312, lat: 31.0425, name: '竹林秘境' },
-      { lng: 121.2298, lat: 31.0445, name: '古寺遗址' },
-    ],
-    photos: [
-      { lng: 121.2305, lat: 31.0415, url: '/photos/tianma-1.jpg', description: '护珠塔' },
-      { lng: 121.2325, lat: 31.0398, url: '/photos/tianma-2.jpg', description: '最高峰' },
-    ],
-  },
-  {
-    id: 'shanghai-4',
-    name: '滨江大道夜跑线',
-    description: '从陆家嘴到世博园区，沿黄浦江两岸的经典路线。夜景绝美，路面平整，是上海夜跑最热门的路线之一。',
-    distance: 10600,
-    duration: 7200,
-    elevation: 25,
-    difficulty: 'easy',
-    type: 'oneWay',
-    startLocation: [121.4958, 31.2397],
-    endLocation: [121.4852, 31.1856],
-    startName: '陆家嘴滨江大道',
-    endName: '世博公园',
-    images: ['/images/routes/bund.jpg'],
-    rating: 4.7,
-    reviewCount: 1205,
-    bestSeason: ['春季', '夏季', '秋季', '冬季'],
-    waypoints: [
-      { lng: 121.4925, lat: 31.2356, name: '东方明珠' },
-      { lng: 121.4898, lat: 31.2285, name: '南浦大桥' },
-      { lng: 121.4875, lat: 31.2058, name: '梅赛德斯奔驰中心' },
-    ],
-    photos: [
-      { lng: 121.4925, lat: 31.2356, url: '/photos/bund-1.jpg', description: '东方明珠' },
-      { lng: 121.4898, lat: 31.2285, url: '/photos/bund-2.jpg', description: '南浦大桥' },
-    ],
-  },
-  
-  // ===== 苏州路线 =====
-  {
-    id: 'suzhou-1',
-    name: '灵岩山-大焦山环线',
-    description: '苏州最经典的徒步路线，被称为"灵白线"的精华段。穿越灵岩山、大焦山，路况多变有挑战性，是苏州户外入门必选。',
-    distance: 8500,
-    duration: 12600,
-    elevation: 420,
-    difficulty: 'medium',
-    type: 'loop',
-    startLocation: [120.5058, 31.2568],
-    endLocation: [120.5058, 31.2568],
-    startName: '灵岩山景区门口',
-    endName: '灵岩山景区门口',
-    images: ['/images/routes/lingyan.jpg'],
-    rating: 4.6,
-    reviewCount: 568,
-    bestSeason: ['春季', '秋季', '冬季'],
-    waypoints: [
-      { lng: 120.5085, lat: 31.2545, name: '灵岩寺' },
-      { lng: 120.5112, lat: 31.2525, name: '大焦山顶' },
-      { lng: 120.5095, lat: 31.2558, name: '天平山后山' },
-      { lng: 120.5072, lat: 31.2582, name: '御道' },
-    ],
-    photos: [
-      { lng: 120.5085, lat: 31.2545, url: '/photos/lingyan-1.jpg', description: '灵岩寺' },
-      { lng: 120.5112, lat: 31.2525, url: '/photos/lingyan-2.jpg', description: '大焦山顶' },
-    ],
-  },
-  {
-    id: 'suzhou-2',
-    name: '穹窿山爱心线',
-    description: '位于苏州西郊，是苏州最高峰（海拔341.7米）。路线走下来GPS轨迹会画出一颗爱心，深受情侣和户外爱好者喜爱。',
-    distance: 12800,
-    duration: 18000,
-    elevation: 680,
-    difficulty: 'hard',
-    type: 'loop',
-    startLocation: [120.3856, 31.2585],
-    endLocation: [120.3856, 31.2585],
-    startName: '穹窿山景区北门',
-    endName: '穹窿山景区北门',
-    images: ['/images/routes/qionglong.jpg'],
-    rating: 4.4,
-    reviewCount: 234,
-    bestSeason: ['春季', '秋季'],
-    waypoints: [
-      { lng: 120.3885, lat: 31.2558, name: '上真观' },
-      { lng: 120.3925, lat: 31.2525, name: '穹窿山顶' },
-      { lng: 120.3898, lat: 31.2585, name: '孙武苑' },
-      { lng: 120.3865, lat: 31.2625, name: '宁邦寺' },
-    ],
-    photos: [
-      { lng: 120.3885, lat: 31.2558, url: '/photos/qionglong-1.jpg', description: '上真观' },
-      { lng: 120.3925, lat: 31.2525, url: '/photos/qionglong-2.jpg', description: '穹窿山顶' },
-    ],
-  },
-  {
-    id: 'suzhou-3',
-    name: '旺山-七子山穿越',
-    description: '位于苏州城南，是相对小众但风景极佳的路线。途径旺山生态园、七子山，可远眺太湖，春季茶园景色宜人。',
-    distance: 11500,
-    duration: 16200,
-    elevation: 520,
-    difficulty: 'medium',
-    type: 'oneWay',
-    startLocation: [120.6125, 31.2035],
-    endLocation: [120.5585, 31.1856],
-    startName: '旺山景区',
-    endName: '七子山',
-    images: ['/images/routes/wangshan.jpg'],
-    rating: 4.3,
-    reviewCount: 189,
-    bestSeason: ['春季', '秋季'],
-    waypoints: [
-      { lng: 120.6085, lat: 31.2012, name: '九龙潭' },
-      { lng: 120.5985, lat: 31.1958, name: '茶园' },
-      { lng: 120.5825, lat: 31.1925, name: '七子山顶' },
-      { lng: 120.5685, lat: 31.1885, name: '乾元寺' },
-    ],
-    photos: [
-      { lng: 120.6085, lat: 31.2012, url: '/photos/wangshan-1.jpg', description: '九龙潭' },
-      { lng: 120.5825, lat: 31.1925, url: '/photos/wangshan-2.jpg', description: '七子山顶' },
-    ],
-  },
-  {
-    id: 'suzhou-4',
-    name: '大阳山翡翠湖环线',
-    description: '大阳山国家森林公园内的隐藏秘境，翡翠色的矿坑湖水美不胜收。路线相对平缓，适合亲子和摄影爱好者。',
-    distance: 6800,
-    duration: 9000,
-    elevation: 280,
-    difficulty: 'easy',
-    type: 'loop',
-    startLocation: [120.4285, 31.3056],
-    endLocation: [120.4285, 31.3056],
-    startName: '大阳山国家森林公园',
-    endName: '大阳山国家森林公园',
-    images: ['/images/routes/dayang.jpg'],
-    rating: 4.5,
-    reviewCount: 312,
-    bestSeason: ['春季', '夏季', '秋季'],
-    waypoints: [
-      { lng: 120.4315, lat: 31.3035, name: '翡翠湖' },
-      { lng: 120.4345, lat: 31.3012, name: '矿坑遗址' },
-      { lng: 120.4325, lat: 31.3068, name: '文殊寺' },
-      { lng: 120.4298, lat: 31.3085, name: '植物园' },
-    ],
-    photos: [
-      { lng: 120.4315, lat: 31.3035, url: '/photos/dayang-1.jpg', description: '翡翠湖' },
-      { lng: 120.4325, lat: 31.3068, url: '/photos/dayang-2.jpg', description: '文殊寺' },
-    ],
-  },
 ];
 
-// 为每条路线生成路径和海拔数据
-export const processedRoutes: Route[] = presetRoutes.map(route => {
-  const start = route.startLocation!;
-  const end = route.endLocation!;
-  
-  const waypoints = route.waypoints?.map(wp => [wp.lng, wp.lat] as [number, number]) || [];
-  
-  const fullPath: Array<[number, number]> = [start];
-  
-  for (let i = 0; i < waypoints.length; i++) {
-    const prev = i === 0 ? start : waypoints[i - 1];
-    const curr = waypoints[i];
-    const midLng = (prev[0] + curr[0]) / 2 + (Math.random() - 0.5) * 0.002;
-    const midLat = (prev[1] + curr[1]) / 2 + (Math.random() - 0.5) * 0.002;
-    fullPath.push([midLng, midLat]);
-    fullPath.push(curr);
-  }
-  
-  if (waypoints.length > 0) {
-    const lastWp = waypoints[waypoints.length - 1];
-    const midLng = (lastWp[0] + end[0]) / 2 + (Math.random() - 0.5) * 0.002;
-    const midLat = (lastWp[1] + end[1]) / 2 + (Math.random() - 0.5) * 0.002;
-    fullPath.push([midLng, midLat]);
-  }
-  
-  fullPath.push(end);
-  
-  return {
-    ...route,
-    path: fullPath,
-    elevationData: generateElevationData(route.distance, route.elevation),
-  };
-});
-
-// 获取所有路线
 export function getAllRoutes(): Route[] {
-  return processedRoutes;
+  return routes;
 }
 
-// 根据ID获取路线
 export function getRouteById(id: string): Route | undefined {
-  return processedRoutes.find(route => route.id === id);
+  return routes.find(r => r.id === id);
 }
